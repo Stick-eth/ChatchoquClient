@@ -2,17 +2,19 @@
 import React, { useEffect, useRef } from 'react';
 import { TenorGif } from './TenorGif';
 
-const TENOR_REGEX = /https?:\/\/tenor\.com\/view\/[^\s]+/i;
-
+// Regex global pour extraire les URLs
+const URL_REGEX = /(https?:\/\/[^\s]+)/g;
+// Regex spécifiques
+const TENOR_REGEX = /^https?:\/\/tenor\.com\/view\/[^\s]+$/i;
+// Regex for Discord CDN with query parameters
+const DISCORD_IMG_REGEX = /^https?:\/\/cdn\.discordapp\.com\/[^\s]+\.(?:png|jpe?g|gif)(\?[^\s]+)?$/i;
 export function ChatPanel({ messages }) {
   const containerRef = useRef(null);
 
-  // À chaque mise à jour de messages, on descend tout en bas
+  // Scroll automatique en bas
   useEffect(() => {
     const c = containerRef.current;
-    if (c) {
-      c.scrollTop = c.scrollHeight;
-    }
+    if (c) c.scrollTop = c.scrollHeight;
   }, [messages]);
 
   return (
@@ -28,22 +30,38 @@ export function ChatPanel({ messages }) {
         flexDirection: 'column',
       }}
     >
-      {messages.map((m, i) => {
-        const text = m.content;
-        const match = text.match(TENOR_REGEX);
-
-        return (
-          <div key={i} style={{ marginBottom: '0.5rem' }}>
-            <span style={{ color: '#555', fontSize: '0.8rem' }}>
-              [{m.timestamp.toLocaleTimeString()}]
-            </span>{' '}
-            {match
-              ? <TenorGif url={match[0]} height={200} />
-              : <span>{text}</span>
-            }
+      {messages.map((m, i) => (
+        <div key={i} style={{ marginBottom: '0.5rem' }}>
+          <span style={{ color: '#555', fontSize: '0.8rem' }}>
+            [{m.timestamp.toLocaleTimeString()}]
+          </span>{' '}
+          <div>
+            {/*
+              On découpe le contenu sur chaque URL,
+              puis on rerenderise chaque "part":
+              - Tenor → <TenorGif>
+              - Discord CDN → <img>
+              - Sinon → texte brut
+            */}
+            {m.content.split(URL_REGEX).map((part, idx) => {
+              if (TENOR_REGEX.test(part)) {
+                return <TenorGif key={idx} url={part} height={200} />;
+              }
+              if (DISCORD_IMG_REGEX.test(part)) {
+                return (
+                  <img
+                    key={idx}
+                    src={part}
+                    alt="shared"
+                    style={{ maxWidth: '100%', maxHeight: 200, display: 'block', margin: '0.5rem 0' }}
+                  />
+                );
+              }
+              return <span key={idx}>{part}</span>;
+            })}
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

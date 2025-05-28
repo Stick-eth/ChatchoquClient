@@ -51,7 +51,7 @@ export function useGameLogic(pseudo) {
         `L'auteur était ${correctAuthor}`,
         ...Object.entries(proposals)
           .filter(([, { guess }]) => guess === correctAuthor)
-          .map(([player]) => `${player} a marqué 1 point !`),
+          .map(([p]) => `${p} a deviné correctement. 😎`),
       ];
       setAnnouncements(roundAnnouncements);
     });
