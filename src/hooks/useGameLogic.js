@@ -20,6 +20,9 @@ export function useGameLogic(pseudo) {
   const [messages, setMessages] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
 
+  // **nouveau** : on stocke l’auteur de la manche qui vient de se terminer
+  const [lastAuthor, setLastAuthor] = useState(null);
+
   // ─── TIMER : décrémente `timeLeft` chaque seconde ─────────────────────────
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -43,7 +46,7 @@ export function useGameLogic(pseudo) {
       ]);
     }
 
-    // 2. Partie démarrée (sans durée spécifique)
+    // 2. Partie démarrée
     function handleGameStarted() {
       setGameStarted(true);
     }
@@ -52,15 +55,16 @@ export function useGameLogic(pseudo) {
     function handleRoundStarted({ roundNumber: rn, scores: sc, guessOptions: go, phaseDuration }) {
       setRoundNumber(rn);
       setPhase('Réflexion');
-      setTimeLeft(phaseDuration);    // durée (en s) fournie par le serveur
+      setTimeLeft(phaseDuration);
       setScores(sc);
       setGuessOptions(go);
       setHasGuessed(false);
       setMessages([]);
       setAnnouncements([]);
+      setLastAuthor(null);  // on réinitialise l’auteur précédent
     }
 
-    // 4. Révélation d’un message
+    // 4. Message révélé
     function handleMessageRevealed({ messagePart }) {
       setMessages(msgs => [
         ...msgs,
@@ -71,8 +75,9 @@ export function useGameLogic(pseudo) {
     // 5. Fin de manche : phase "Résultat"
     function handleRoundEnded({ correctAuthor, proposals, scores: sc, resultDuration }) {
       setPhase('Résultat');
-      setTimeLeft(resultDuration);   // durée (en s) fournie par le serveur
+      setTimeLeft(resultDuration);
       setScores(sc);
+      setLastAuthor(correctAuthor);  // on conserve l’auteur
       const roundAnnouncements = [
         `L'auteur était ${correctAuthor}`,
         ...Object.entries(proposals)
@@ -83,13 +88,11 @@ export function useGameLogic(pseudo) {
     }
 
     // 6. Transition entre manches
-    function handleTransitionStarted({ ranking, nextRoundIn }) {
+    function handleTransitionStarted({ nextRoundIn, correctAuthor }) {
       setPhase('Transition');
-      setTimeLeft(nextRoundIn);      // "nextRoundIn" en secondes
+      setTimeLeft(nextRoundIn);
       setAnnouncements([
-        'Classement actuel :',
-        ...ranking.map(r => `${r.pseudo} (${r.score})`)
-      ]);
+       `Manche ${roundNumber}, l'auteur était ${correctAuthor}.`,]);
     }
 
     // 7. Fin de partie
@@ -128,7 +131,7 @@ export function useGameLogic(pseudo) {
       socket.off('gameEnded', handleGameEnded);
       socket.off('errorMessage', handleErrorMessage);
     };
-  }, [pseudo]);
+  }, [pseudo, roundNumber, lastAuthor]);
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
   function joinRoom({ roomCode, pseudo: p }) {
