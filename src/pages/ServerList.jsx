@@ -8,12 +8,21 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
   const [tmpPseudo, setTmpPseudo] = useState(pseudo);
 
   useEffect(() => {
-    socket.emit('getActiveRooms');
+    const fetchRooms = () => socket.emit('getActiveRooms');
+    fetchRooms();
+
     function handleRooms({ rooms }) {
       setRooms(rooms);
     }
+
     socket.on('activeRooms', handleRooms);
-    return () => socket.off('activeRooms', handleRooms);
+
+    const intervalId = setInterval(fetchRooms, 5000);
+
+    return () => {
+      socket.off('activeRooms', handleRooms);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const createRoom = () => {
