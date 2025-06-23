@@ -13,7 +13,13 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
       setRooms(rooms);
     }
     socket.on('activeRooms', handleRooms);
-    return () => socket.off('activeRooms', handleRooms);
+    const interval = setInterval(() => {
+      socket.emit('getActiveRooms');
+    }, 5000);
+    return () => {
+      socket.off('activeRooms', handleRooms);
+      clearInterval(interval);
+    };
   }, []);
 
   const createRoom = () => {
