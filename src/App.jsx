@@ -17,6 +17,7 @@ export default function App() {
     rounds: 10,
     onlyGifs: false,
     messagesPerRound: 1,
+    minMessageLength: 20,
   });
 
   const {
@@ -111,7 +112,7 @@ export default function App() {
           {currentRoom && <span>Salon {currentRoom} – </span>}
           Paramètres : {gameSettings.roundsTotal} manches –{' '}
           {gameSettings.messagesPerRound} messages/manche –{' '}
-          {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'}
+          {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'} – Pav-o-meter {gameSettings.minMessageLength}
         </div>
       )}
     </div>

@@ -18,12 +18,13 @@ When the user is the host of a room, additional settings can be tuned before sta
 - **Rounds** – slider between 5 and 50 (step of 5, default 10)
 - **Messages per round** – slider between 1 and 10
 - **Only GIFs** – toggle button
+- **Pav-o-meter** – slider between 3 and 1024 controlling the minimum message length
 
 Once configured, these values are sent with the `startGame` socket event. On the server side implement a listener:
 
 ```js
 io.on('connection', (socket) => {
-  socket.on('startGame', ({ rounds, messagesPerRound, onlyGifs }) => {
+  socket.on('startGame', ({ rounds, messagesPerRound, onlyGifs, minMessageLength }) => {
     // Start the game with the given settings
   });
 });
