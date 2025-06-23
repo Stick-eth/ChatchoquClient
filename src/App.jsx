@@ -68,6 +68,17 @@ export default function App() {
         {gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}
       </h1>
 
+      <button
+        onClick={() => {
+          if (window.confirm("Quitter la partie ?")) {
+            leaveRoom();
+          }
+        }}
+        style={{ position: 'absolute', top: '1rem', right: '1rem' }}
+      >
+        Quitter
+      </button>
+
       <GameHeader
         roundNumber={roundNumber}
         phase={phase}
