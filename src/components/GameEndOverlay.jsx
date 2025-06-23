@@ -15,7 +15,7 @@ export function GameEndOverlay({ visible, ranking, isChef, onRestart, onQuit }) 
         </ol>
         <div style={{ marginTop: '1rem' }}>
           {isChef && <button onClick={onRestart}>Relancer</button>}
-          <button onClick={onQuit} style={{ marginLeft: isChef ? '0.5rem' : 0 }}>Quitter</button>
+          <button onClick={onQuit}>Quitter</button>
         </div>
       </div>
     </div>

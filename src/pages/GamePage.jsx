@@ -53,12 +53,47 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
   // Loading screen while connecting
   if (!connected) {
-    return <div style={{ padding: '2rem' }}>Connexion…</div>;
+    return <div className="container">Connexion…</div>;
+  }
+
+  if (!gameStarted) {
+    return (
+      <div className="container game-page" style={{ position: 'relative' }}>
+        <h1>{`Room #${currentRoom}`}</h1>
+
+        <button
+          onClick={() => {
+            if (window.confirm('Quitter la partie ?')) {
+              leaveRoom();
+              if (onLeave) onLeave();
+              window.location.reload();
+            }
+          }}
+          style={{ position: 'absolute', top: '1rem', right: '1rem' }}
+        >
+          Quitter
+        </button>
+
+        <GameHeader
+          roundNumber={roundNumber}
+          phase={phase}
+          timeLeft={timeLeft}
+          isChef={isChef}
+          gameStarted={gameStarted}
+          roomParams={roomParams}
+          setRoomParams={setRoomParams}
+          onStart={() => startGame(roomParams)}
+        />
+
+        <Announcements announcements={announcements} />
+        <Scores scores={scores} chefName={chefName} />
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
-      <h1>{gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}</h1>
+    <div className="container game-page" style={{ position: 'relative' }}>
+      <h1>{gameStarted ? 'TerraGuessr' : `Room #${currentRoom}`}</h1>
 
       <button
         onClick={() => {
@@ -84,11 +119,10 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         onStart={() => startGame(roomParams)}
       />
 
-      <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
         <ChatPanel messages={messages} />
 
-        <div style={{ flex: 1 }}>
-          <Announcements announcements={announcements} />
+        <div className="sidebar">
           <Scores scores={scores} chefName={chefName} />
         </div>
       </div>
@@ -106,6 +140,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         scores={scores}
         proposals={lastProposals}
         roundPoints={lastRoundPoints}
+        myPseudo={pseudo}
       />
 
       <GameEndOverlay
@@ -121,7 +156,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
       />
 
       {gameStarted && gameSettings && (
-        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#555' }}>
+        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           {currentRoom && <span>Salon {currentRoom} – </span>}
           Paramètres : {gameSettings.roundsTotal} manches –{' '}
           {gameSettings.messagesPerRound} messages/manche –{' '}

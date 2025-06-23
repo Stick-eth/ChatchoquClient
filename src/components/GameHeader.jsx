@@ -18,7 +18,7 @@ export function GameHeader({
   setRoomParams,
 }) {
   return (
-    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
       <div>Manche: {roundNumber}</div>
       <div>
         Phase: {phase}
