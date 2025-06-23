@@ -8,6 +8,7 @@ import { Announcements } from './components/Announcements';
 import { Scores } from './components/Scores';
 import { GuessZone } from './components/GuessZone';
 import { RoundSummaryOverlay } from './components/RoundSummaryOverlay';
+import { GameEndOverlay } from './components/GameEndOverlay';
 
 export default function App() {
   const [roomCode, setRoomCode] = useState('');
@@ -36,6 +37,9 @@ export default function App() {
     joinRoom,
     startGame,
     submitGuess,
+    restartLobby,
+    leaveRoom,
+    finalRanking,
   } = useGameLogic(pseudo);
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
@@ -91,6 +95,14 @@ export default function App() {
         visible={overlayVisible}
         author={lastAuthor}
         scores={scores}
+      />
+
+      <GameEndOverlay
+        visible={phase === 'Terminé'}
+        ranking={finalRanking}
+        isChef={isChef}
+        onRestart={restartLobby}
+        onQuit={leaveRoom}
       />
 
       {gameStarted && gameSettings && (
