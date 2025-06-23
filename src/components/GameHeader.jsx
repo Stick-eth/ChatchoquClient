@@ -63,17 +63,17 @@ export function GameHeader({
             />
           </label>
           <label>
-            Pav-o-meter: {roomParams.pav}
+            Pav-o-meter: {roomParams.minMessageLength}
             <input
               type="range"
               min="3"
               max="1024"
               step="1"
-              value={roomParams.pav}
+              value={roomParams.minMessageLength}
               onChange={e =>
                 setRoomParams({
                   ...roomParams,
-                  pav: parseInt(e.target.value, 10),
+                  minMessageLength: parseInt(e.target.value, 10),
                 })
               }
             />
