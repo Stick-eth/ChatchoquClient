@@ -34,6 +34,7 @@ export default function App() {
     messages,
     announcements,
     lastAuthor,
+    lastProposals,
     gameSettings,
     currentRoom,
     joinRoom,
@@ -97,6 +98,7 @@ export default function App() {
         visible={overlayVisible}
         author={lastAuthor}
         scores={scores}
+        proposals={lastProposals}
       />
 
       <GameEndOverlay
