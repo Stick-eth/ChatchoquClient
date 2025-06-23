@@ -27,6 +27,28 @@
         margin-top: 1rem;
         padding: 0.5rem 1rem;
       }
+
+      .confetti-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 150;
+      }
+      .confetti-piece {
+        position: absolute;
+        top: -10px;
+        width: 8px;
+        height: 8px;
+        opacity: 0.9;
+        animation-name: confetti-fall;
+        animation-timing-function: linear;
+      }
+      @keyframes confetti-fall {
+        to {
+          transform: translateY(100vh) rotate(720deg);
+        }
+      }
     </style>
   </head>
   <body>
