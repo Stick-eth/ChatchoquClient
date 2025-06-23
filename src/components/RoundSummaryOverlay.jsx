@@ -1,6 +1,6 @@
 import React from 'react';
 import { Confetti } from './Confetti';
-export function RoundSummaryOverlay({ visible, author, scores, proposals = {} }) {
+export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, roundPoints = {} }) {
   if (!visible) return null;
 
   const ranking = Object.entries(scores)
@@ -15,13 +15,14 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {} })
           {ranking.map(([p, s]) => {
             const guess = proposals[p]?.guess;
             const correct = guess === author;
+            const points = roundPoints[p] ?? 0;
             return (
               <li
                 key={p}
                 style={{ position: 'relative', padding: '0.5rem 0' }}
               >
                 <span>
-                  {p}: {s}
+                  {correct ? '✅' : '❌'} {p}: {s} (+{points})
                 </span>
                 <Confetti active={correct} />
               </li>

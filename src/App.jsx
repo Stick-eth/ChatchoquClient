@@ -35,6 +35,7 @@ export default function App() {
     announcements,
     lastAuthor,
     lastProposals,
+    lastRoundPoints,
     gameSettings,
     currentRoom,
     joinRoom,
@@ -99,6 +100,7 @@ export default function App() {
         author={lastAuthor}
         scores={scores}
         proposals={lastProposals}
+        roundPoints={lastRoundPoints}
       />
 
       <GameEndOverlay
