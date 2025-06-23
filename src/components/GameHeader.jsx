@@ -62,6 +62,22 @@ export function GameHeader({
               }
             />
           </label>
+          <label>
+            Pav-o-meter: {roomParams.pav}
+            <input
+              type="range"
+              min="3"
+              max="1024"
+              step="1"
+              value={roomParams.pav}
+              onChange={e =>
+                setRoomParams({
+                  ...roomParams,
+                  pav: parseInt(e.target.value, 10),
+                })
+              }
+            />
+          </label>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
             <input
               type="checkbox"

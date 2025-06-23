@@ -69,9 +69,9 @@ export function useGameLogic(pseudo) {
     }
 
     // 2. Partie démarrée
-    function handleGameStarted({ roundsTotal, messagesPerRound, onlyGifs }) {
+    function handleGameStarted({ roundsTotal, messagesPerRound, onlyGifs, pav }) {
       setGameStarted(true);
-      setGameSettings({ roundsTotal, messagesPerRound, onlyGifs });
+      setGameSettings({ roundsTotal, messagesPerRound, onlyGifs, pav });
       setFinalRanking([]);
     }
 
