@@ -105,6 +105,10 @@ input {
   text-align: center;
 }
 
+.modal input {
+  margin-bottom: 1rem;
+}
+
 .confetti-container {
   position: fixed;
   inset: 0;

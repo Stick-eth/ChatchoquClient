@@ -56,6 +56,41 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     return <div className="container">Connexion…</div>;
   }
 
+  if (!gameStarted) {
+    return (
+      <div className="container game-page" style={{ position: 'relative' }}>
+        <h1>{`Room #${currentRoom}`}</h1>
+
+        <button
+          onClick={() => {
+            if (window.confirm('Quitter la partie ?')) {
+              leaveRoom();
+              if (onLeave) onLeave();
+              window.location.reload();
+            }
+          }}
+          style={{ position: 'absolute', top: '1rem', right: '1rem' }}
+        >
+          Quitter
+        </button>
+
+        <GameHeader
+          roundNumber={roundNumber}
+          phase={phase}
+          timeLeft={timeLeft}
+          isChef={isChef}
+          gameStarted={gameStarted}
+          roomParams={roomParams}
+          setRoomParams={setRoomParams}
+          onStart={() => startGame(roomParams)}
+        />
+
+        <Announcements announcements={announcements} />
+        <Scores scores={scores} chefName={chefName} />
+      </div>
+    );
+  }
+
   return (
     <div className="container game-page" style={{ position: 'relative' }}>
       <h1>{gameStarted ? 'TerraGuessr' : `Room #${currentRoom}`}</h1>
@@ -88,7 +123,6 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         <ChatPanel messages={messages} />
 
         <div className="sidebar">
-          <Announcements announcements={announcements} />
           <Scores scores={scores} chefName={chefName} />
         </div>
       </div>
