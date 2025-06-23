@@ -46,6 +46,18 @@ export function useGameLogic(pseudo) {
       ]);
     }
 
+    function handleUserJoined({ pseudo: newPseudo, chef }) {
+      setScores(prevScores => {
+        const newScores = { ...prevScores, [newPseudo]: 0 };
+        setAnnouncements([
+          `Participants : ${Object.keys(newScores).join(', ')}`,
+          `Chef : ${chef}`
+        ]);
+        return newScores;
+      });
+      setIsChef(pseudo === chef);
+    }
+
     // 2. Partie démarrée
     function handleGameStarted() {
       setGameStarted(true);
@@ -112,6 +124,7 @@ export function useGameLogic(pseudo) {
 
     // Enregistrement des handlers
     socket.on('roomData', handleRoomData);
+    socket.on('userJoined', handleUserJoined);
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
     socket.on('messageRevealed', handleMessageRevealed);
@@ -123,6 +136,7 @@ export function useGameLogic(pseudo) {
     // Cleanup
     return () => {
       socket.off('roomData', handleRoomData);
+      socket.off('userJoined', handleUserJoined);
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
       socket.off('messageRevealed', handleMessageRevealed);
