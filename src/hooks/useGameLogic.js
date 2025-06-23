@@ -25,6 +25,8 @@ export function useGameLogic(pseudo) {
   const [lastAuthor, setLastAuthor] = useState(null);
   // on conserve aussi les propositions de la manche
   const [lastProposals, setLastProposals] = useState({});
+  // points gagnés lors de la dernière manche
+  const [lastRoundPoints, setLastRoundPoints] = useState({});
   // paramètres envoyés par le serveur lors du démarrage
   const [gameSettings, setGameSettings] = useState(null);
   const [currentRoom, setCurrentRoom] = useState('');
@@ -89,6 +91,7 @@ export function useGameLogic(pseudo) {
       setAnnouncements([]);
       setLastAuthor(null);  // on réinitialise l’auteur précédent
       setLastProposals({});
+      setLastRoundPoints({});
     }
 
     // 4. Message révélé
@@ -100,12 +103,13 @@ export function useGameLogic(pseudo) {
     }
 
     // 5. Fin de manche : phase "Résultat"
-    function handleRoundEnded({ correctAuthor, proposals, scores: sc, resultDuration }) {
+    function handleRoundEnded({ correctAuthor, proposals, scores: sc, resultDuration, roundPoints }) {
       setPhase('Résultat');
       setTimeLeft(resultDuration);
       setScores(sc);
       setLastAuthor(correctAuthor);  // on conserve l’auteur
       setLastProposals(proposals);
+      setLastRoundPoints(roundPoints || {});
       const roundAnnouncements = [
         `L'auteur était ${correctAuthor}`,
         ...Object.entries(proposals)
@@ -150,6 +154,7 @@ export function useGameLogic(pseudo) {
       setGameSettings(null);
       setLastAuthor(null);
       setLastProposals({});
+      setLastRoundPoints({});
       setFinalRanking([]);
     }
 
@@ -220,6 +225,7 @@ export function useGameLogic(pseudo) {
     setAnnouncements([]);
     setLastAuthor(null);
     setLastProposals({});
+    setLastRoundPoints({});
     setGameSettings(null);
     setCurrentRoom('');
     setFinalRanking([]);
@@ -241,6 +247,7 @@ export function useGameLogic(pseudo) {
     announcements,
     lastAuthor,
     lastProposals,
+    lastRoundPoints,
     gameSettings,
     currentRoom,
     joinRoom,
