@@ -23,6 +23,8 @@ export function useGameLogic(pseudo) {
 
   // **nouveau** : on stocke l’auteur de la manche qui vient de se terminer
   const [lastAuthor, setLastAuthor] = useState(null);
+  // on conserve aussi les propositions de la manche
+  const [lastProposals, setLastProposals] = useState({});
   // paramètres envoyés par le serveur lors du démarrage
   const [gameSettings, setGameSettings] = useState(null);
   const [currentRoom, setCurrentRoom] = useState('');
@@ -86,6 +88,7 @@ export function useGameLogic(pseudo) {
       setMessages([]);
       setAnnouncements([]);
       setLastAuthor(null);  // on réinitialise l’auteur précédent
+      setLastProposals({});
     }
 
     // 4. Message révélé
@@ -102,6 +105,7 @@ export function useGameLogic(pseudo) {
       setTimeLeft(resultDuration);
       setScores(sc);
       setLastAuthor(correctAuthor);  // on conserve l’auteur
+      setLastProposals(proposals);
       const roundAnnouncements = [
         `L'auteur était ${correctAuthor}`,
         ...Object.entries(proposals)
@@ -145,6 +149,7 @@ export function useGameLogic(pseudo) {
       setIsChef(pseudo === chef);
       setGameSettings(null);
       setLastAuthor(null);
+      setLastProposals({});
       setFinalRanking([]);
     }
 
@@ -214,6 +219,7 @@ export function useGameLogic(pseudo) {
     setMessages([]);
     setAnnouncements([]);
     setLastAuthor(null);
+    setLastProposals({});
     setGameSettings(null);
     setCurrentRoom('');
     setFinalRanking([]);
@@ -234,6 +240,7 @@ export function useGameLogic(pseudo) {
     messages,
     announcements,
     lastAuthor,
+    lastProposals,
     gameSettings,
     currentRoom,
     joinRoom,
