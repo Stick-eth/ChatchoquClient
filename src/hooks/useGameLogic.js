@@ -26,6 +26,7 @@ export function useGameLogic(pseudo) {
   // paramètres envoyés par le serveur lors du démarrage
   const [gameSettings, setGameSettings] = useState(null);
   const [currentRoom, setCurrentRoom] = useState('');
+  const [finalRanking, setFinalRanking] = useState([]);
 
   // ─── TIMER : décrémente `timeLeft` chaque seconde ─────────────────────────
   useEffect(() => {
@@ -45,6 +46,7 @@ export function useGameLogic(pseudo) {
       setIsChef(pseudo === chef);
       setChefName(chef);
       setScores(Object.fromEntries(participants.map(p => [p, 0])));
+      setFinalRanking([]);
       setAnnouncements([
         `Participants : ${participants
           .map(p => (p === chef ? `👑${p}` : p))
@@ -70,6 +72,7 @@ export function useGameLogic(pseudo) {
     function handleGameStarted({ roundsTotal, messagesPerRound, onlyGifs }) {
       setGameStarted(true);
       setGameSettings({ roundsTotal, messagesPerRound, onlyGifs });
+      setFinalRanking([]);
     }
 
     // 3. Nouvelle manche : phase "Réflexion"
@@ -120,10 +123,29 @@ export function useGameLogic(pseudo) {
     function handleGameEnded({ finalRanking }) {
       setPhase('Terminé');
       setTimeLeft(0);
+      setFinalRanking(finalRanking);
       setAnnouncements([
         'Partie terminée ! Classement final :',
         ...finalRanking.map(r => `${r.pseudo} (${r.score})`)
       ]);
+    }
+
+    // 8. Lobby redémarré
+    function handleLobbyRestarted({ participants, chef }) {
+      setGameStarted(false);
+      setPhase('');
+      setRoundNumber(0);
+      setScores(Object.fromEntries(participants.map(p => [p, 0])));
+      setGuessOptions([]);
+      setMessages([]);
+      setAnnouncements([
+        `Participants : ${participants.join(', ')}`,
+        `Chef : ${chef}`,
+      ]);
+      setIsChef(pseudo === chef);
+      setGameSettings(null);
+      setLastAuthor(null);
+      setFinalRanking([]);
     }
 
     // 8. Erreur serveur
@@ -140,6 +162,7 @@ export function useGameLogic(pseudo) {
     socket.on('roundEnded', handleRoundEnded);
     socket.on('transitionStarted', handleTransitionStarted);
     socket.on('gameEnded', handleGameEnded);
+    socket.on('lobbyRestarted', handleLobbyRestarted);
     socket.on('errorMessage', handleErrorMessage);
 
     // Cleanup
@@ -152,6 +175,7 @@ export function useGameLogic(pseudo) {
       socket.off('roundEnded', handleRoundEnded);
       socket.off('transitionStarted', handleTransitionStarted);
       socket.off('gameEnded', handleGameEnded);
+      socket.off('lobbyRestarted', handleLobbyRestarted);
       socket.off('errorMessage', handleErrorMessage);
     };
   }, [pseudo, roundNumber, lastAuthor]);
@@ -169,6 +193,30 @@ export function useGameLogic(pseudo) {
   function submitGuess(guess) {
     socket.emit('submitGuess', { guess });
     setHasGuessed(true);
+  }
+
+  function restartLobby() {
+    socket.emit('restartLobby');
+  }
+
+  function leaveRoom() {
+    socket.emit('leaveRoom');
+    // reset local state
+    setConnected(false);
+    setGameStarted(false);
+    setIsChef(false);
+    setRoundNumber(0);
+    setPhase('');
+    setTimeLeft(0);
+    setGuessOptions([]);
+    setHasGuessed(false);
+    setScores({});
+    setMessages([]);
+    setAnnouncements([]);
+    setLastAuthor(null);
+    setGameSettings(null);
+    setCurrentRoom('');
+    setFinalRanking([]);
   }
 
   // ─── VALEURS EXPOSEES AU COMPOSANT ────────────────────────────────────────
@@ -191,5 +239,8 @@ export function useGameLogic(pseudo) {
     joinRoom,
     startGame,
     submitGuess,
+    restartLobby,
+    leaveRoom,
+    finalRanking,
   };
 }
