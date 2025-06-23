@@ -1,27 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { socket } from '../socket';
 
 export function JoinRoom({ roomCode, setRoomCode, pseudo, setPseudo, onJoin }) {
-return (
+  const [rooms, setRooms] = useState([]);
+
+  useEffect(() => {
+    socket.emit('getActiveRooms');
+    function handleRooms({ rooms }) {
+      setRooms(rooms);
+    }
+    socket.on('activeRooms', handleRooms);
+    return () => {
+      socket.off('activeRooms', handleRooms);
+    };
+  }, []);
+
+  return (
     <div style={{ padding: '2rem' }}>
-        <h1>Rejoindre la partie</h1>
+      <h1>Rejoindre la partie</h1>
+      <div style={{ marginBottom: '1rem' }}>
         <input
-            placeholder="Code salon"
-            value={roomCode}
-            onChange={e => {
-                const value = e.target.value;
-                if (/^\d{0,6}$/.test(value)) {
-                    setRoomCode(value);
-                }
-            }}
+          placeholder="Pseudo"
+          value={pseudo}
+          onChange={e => setPseudo(e.target.value)}
         />
+      </div>
+      <div style={{ marginBottom: '1rem' }}>
         <input
-            placeholder="Pseudo"
-            value={pseudo}
-            onChange={e => setPseudo(e.target.value)}
+          placeholder="Code salon"
+          value={roomCode}
+          onChange={e => {
+            const value = e.target.value;
+            if (/^\d{0,6}$/.test(value)) {
+              setRoomCode(value);
+            }
+          }}
         />
         <button onClick={() => onJoin({ roomCode, pseudo })}>
-            Rejoindre
+          Rejoindre
         </button>
+      </div>
+      <h2>Salles disponibles</h2>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {rooms.map(r => (
+          <li key={r.roomCode} style={{ marginBottom: '0.5rem' }}>
+            <button
+              style={{ width: '100%' }}
+              onClick={() => onJoin({ roomCode: r.roomCode, pseudo })}
+            >
+              {`#${r.roomCode} – ${r.chef} (${r.playerCount})`}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
-);
+  );
 }
