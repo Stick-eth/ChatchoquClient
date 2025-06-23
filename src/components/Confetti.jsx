@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-export function Confetti({ active }) {
+export function Confetti({ active, style }) {
   const [pieces, setPieces] = useState([]);
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export function Confetti({ active }) {
   if (!active) return null;
 
   return (
-    <div className="confetti-container">
+    <div className="confetti-container" style={style}>
       {pieces.map((p, i) => (
         <div
           key={i}
