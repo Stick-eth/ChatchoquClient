@@ -72,6 +72,18 @@ export function useGameLogic(pseudo) {
       setChefName(chef);
     }
 
+    function handlePlayerLeft({ pseudo: leftPseudo }) {
+      setScores(prevScores => {
+        const { [leftPseudo]: _removed, ...newScores } = prevScores;
+        setAnnouncements([
+          `Participants : ${Object.keys(newScores)
+            .map(p => (p === chefName ? `👑${p}` : p))
+            .join(', ')}`
+        ]);
+        return newScores;
+      });
+    }
+
     // 2. Partie démarrée
     function handleGameStarted({ roundsTotal, messagesPerRound, onlyGifs, minMessageLength }) {
       setGameStarted(true);
@@ -166,6 +178,7 @@ export function useGameLogic(pseudo) {
     // Enregistrement des handlers
     socket.on('roomData', handleRoomData);
     socket.on('userJoined', handleUserJoined);
+    socket.on('playerLeft', handlePlayerLeft);
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
     socket.on('messageRevealed', handleMessageRevealed);
@@ -179,6 +192,7 @@ export function useGameLogic(pseudo) {
     return () => {
       socket.off('roomData', handleRoomData);
       socket.off('userJoined', handleUserJoined);
+      socket.off('playerLeft', handlePlayerLeft);
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
       socket.off('messageRevealed', handleMessageRevealed);
@@ -188,7 +202,7 @@ export function useGameLogic(pseudo) {
       socket.off('lobbyRestarted', handleLobbyRestarted);
       socket.off('errorMessage', handleErrorMessage);
     };
-  }, [pseudo, roundNumber, lastAuthor]);
+  }, [pseudo, roundNumber, lastAuthor, chefName]);
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
   function joinRoom({ roomCode, pseudo: p }) {

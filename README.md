@@ -29,3 +29,15 @@ io.on('connection', (socket) => {
   });
 });
 ```
+
+## Player departures
+
+When a participant leaves the lobby before the game has started, the server emits a
+`playerLeft` event to everyone still in the room. Its payload contains the pseudo of the
+departing player so that clients can update their local list:
+
+```javascript
+socket.on('playerLeft', ({ pseudo }) => {
+  console.log(pseudo, 'left the room');
+});
+```
