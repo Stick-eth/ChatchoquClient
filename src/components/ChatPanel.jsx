@@ -18,23 +18,10 @@ export function ChatPanel({ messages }) {
   }, [messages]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        flex: 2,
-        border: '1px solid #ccc',
-        padding: '1rem',
-        height: '300px',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <div ref={containerRef} className="chat-panel">
       {messages.map((m, i) => (
-        <div key={i} style={{ marginBottom: '0.5rem' }}>
-          <span style={{ color: '#555', fontSize: '0.8rem' }}>
-            [{m.timestamp.toLocaleTimeString()}]
-          </span>{' '}
+        <div key={i} className="chat-message">
+          <span className="chat-timestamp">[{m.timestamp.toLocaleTimeString()}]</span>{' '}
           <div>
             {/*
               On découpe le contenu sur chaque URL,
@@ -53,7 +40,7 @@ export function ChatPanel({ messages }) {
                     key={idx}
                     src={part}
                     alt="shared"
-                    style={{ maxWidth: '100%', maxHeight: 200, display: 'block', margin: '0.5rem 0' }}
+                    className="chat-img"
                   />
                 );
               }

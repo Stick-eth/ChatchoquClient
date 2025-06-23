@@ -8,8 +8,8 @@ export function GuessZone({ phase, guessOptions, hasGuessed, onGuess }) {
         <button
           key={u}
           disabled={hasGuessed}
-          style={{ marginRight: '0.5rem' }}
           onClick={() => onGuess(u)}
+          style={{ marginRight: '0.5rem' }}
         >
           {u}
         </button>

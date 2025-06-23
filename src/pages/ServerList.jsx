@@ -28,7 +28,7 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
   };
 
   return (
-    <div style={{ padding: '2rem', position: 'relative' }}>
+    <div className="container" style={{ position: 'relative' }}>
       <button
         style={{ position: 'absolute', top: '1rem', right: '1rem' }}
         onClick={() => {
@@ -41,7 +41,7 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
 
       <h1>Choix du salon</h1>
 
-      <div style={{ marginBottom: '1rem' }}>
+      <div style={{ marginBottom: '1rem', display: 'flex', gap: '0.5rem' }}>
         <input
           placeholder="Code salon (6 chiffres)"
           value={roomCode}
@@ -51,29 +51,17 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
           }}
         />
         <button onClick={() => roomCode && onJoin(roomCode)}>Rejoindre</button>
-        <button style={{ marginLeft: '0.5rem' }} onClick={createRoom}>
-          Créer une salle
-        </button>
+        <button onClick={createRoom}>Créer une salle</button>
       </div>
 
       <h2>Salles disponibles</h2>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {rooms.map(r => (
           <li key={r.roomCode} style={{ marginBottom: '0.5rem' }}>
-            <button
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                textAlign: 'center',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                background: '#f8f8f8',
-              }}
-              onClick={() => onJoin(r.roomCode)}
-            >
+            <button className="card" style={{ width: '100%', textAlign: 'center' }} onClick={() => onJoin(r.roomCode)}>
               <div style={{ fontSize: '1.25rem' }}>#{r.roomCode}</div>
-              <div style={{ fontSize: '0.8rem', color: '#666' }}>{r.chef}</div>
-              <hr style={{ width: '33%', margin: '0.5rem auto' }} />
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{r.chef}</div>
+              <hr style={{ width: '33%', margin: '0.5rem auto', borderColor: 'var(--border-color)' }} />
               <div>{r.playerCount} joueur{r.playerCount > 1 ? 's' : ''}</div>
             </button>
           </li>

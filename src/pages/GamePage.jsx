@@ -53,11 +53,11 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
   // Loading screen while connecting
   if (!connected) {
-    return <div style={{ padding: '2rem' }}>Connexion…</div>;
+    return <div className="container">Connexion…</div>;
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
+    <div className="container game-page" style={{ position: 'relative' }}>
       <h1>{gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}</h1>
 
       <button
@@ -84,10 +84,10 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         onStart={() => startGame(roomParams)}
       />
 
-      <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
         <ChatPanel messages={messages} />
 
-        <div style={{ flex: 1 }}>
+        <div className="sidebar">
           <Announcements announcements={announcements} />
           <Scores scores={scores} chefName={chefName} />
         </div>
@@ -121,7 +121,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
       />
 
       {gameStarted && gameSettings && (
-        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#555' }}>
+        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           {currentRoom && <span>Salon {currentRoom} – </span>}
           Paramètres : {gameSettings.roundsTotal} manches –{' '}
           {gameSettings.messagesPerRound} messages/manche –{' '}
