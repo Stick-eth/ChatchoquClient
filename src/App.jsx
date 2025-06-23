@@ -7,6 +7,7 @@ import { ChatPanel } from './components/ChatPanel';
 import { Announcements } from './components/Announcements';
 import { Scores } from './components/Scores';
 import { GuessZone } from './components/GuessZone';
+import { RoundSummaryOverlay } from './components/RoundSummaryOverlay';
 
 export default function App() {
   const [roomCode, setRoomCode] = useState('');
@@ -24,10 +25,13 @@ export default function App() {
     scores,
     messages,
     announcements,
+    lastAuthor,
     joinRoom,
     startGame,
     submitGuess,
   } = useGameLogic(pseudo);
+
+  const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
   // Écran de connexion tant que non connecté
   if (!connected) {
@@ -44,7 +48,7 @@ export default function App() {
 
   // Vue principale de la partie
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
       <h1>Devine l'auteur</h1>
 
       <GameHeader
@@ -70,6 +74,12 @@ export default function App() {
         guessOptions={guessOptions}
         hasGuessed={hasGuessed}
         onGuess={submitGuess}
+      />
+
+      <RoundSummaryOverlay
+        visible={overlayVisible}
+        author={lastAuthor}
+        scores={scores}
       />
     </div>
   );
