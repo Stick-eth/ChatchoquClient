@@ -160,6 +160,7 @@ export function useGameLogic(pseudo) {
     scores,
     messages,
     announcements,
+    lastAuthor,
     joinRoom,
     startGame,
     submitGuess,
