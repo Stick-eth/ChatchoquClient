@@ -138,8 +138,8 @@ export function useGameLogic(pseudo) {
     socket.emit('joinRoom', { roomCode, pseudo: p });
   }
 
-  function startGame() {
-    socket.emit('startGame');
+  function startGame(params = {}) {
+    socket.emit('startGame', params);
   }
 
   function submitGuess(guess) {

@@ -13,7 +13,9 @@ export function GameHeader({
   timeLeft,
   isChef,
   gameStarted,
-  onStart
+  onStart,
+  roomParams,
+  setRoomParams,
 }) {
   return (
     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -27,7 +29,54 @@ export function GameHeader({
         )}
       </div>
       {isChef && !gameStarted && (
-        <button onClick={onStart}>Démarrer</button>
+        <>
+          <label>
+            Rounds: {roomParams.rounds}
+            <input
+              type="range"
+              min="5"
+              max="50"
+              step="5"
+              value={roomParams.rounds}
+              onChange={e =>
+                setRoomParams({
+                  ...roomParams,
+                  rounds: parseInt(e.target.value, 10),
+                })
+              }
+            />
+          </label>
+          <label>
+            Messages/round: {roomParams.messagesPerRound}
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={roomParams.messagesPerRound}
+              onChange={e =>
+                setRoomParams({
+                  ...roomParams,
+                  messagesPerRound: parseInt(e.target.value, 10),
+                })
+              }
+            />
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <input
+              type="checkbox"
+              checked={roomParams.onlyGifs}
+              onChange={e =>
+                setRoomParams({
+                  ...roomParams,
+                  onlyGifs: e.target.checked,
+                })
+              }
+            />
+            Uniquement Gifs
+          </label>
+          <button onClick={onStart}>Démarrer</button>
+        </>
       )}
     </div>
   );
