@@ -58,7 +58,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
   return (
     <div className="container game-page" style={{ position: 'relative' }}>
-      <h1>{gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}</h1>
+      <h1>{gameStarted ? 'TerraGuessr' : `Room #${currentRoom}`}</h1>
 
       <button
         onClick={() => {

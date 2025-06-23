@@ -28,6 +28,10 @@ button:hover {
   background-color: var(--accent-hover);
 }
 
+button + button {
+  margin-left: 0.5rem;
+}
+
 input {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
@@ -38,6 +42,8 @@ input {
 
 .container {
   padding: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
 .card {
