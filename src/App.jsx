@@ -22,6 +22,7 @@ export default function App() {
     connected,
     gameStarted,
     isChef,
+    chefName,
     roundNumber,
     phase,
     timeLeft,
@@ -76,7 +77,7 @@ export default function App() {
 
         <div style={{ flex: 1 }}>
           <Announcements announcements={announcements} />
-          <Scores scores={scores} />
+          <Scores scores={scores} chefName={chefName} />
         </div>
       </div>
 

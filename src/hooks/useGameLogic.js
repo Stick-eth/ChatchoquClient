@@ -7,6 +7,7 @@ export function useGameLogic(pseudo) {
   const [connected, setConnected] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const [isChef, setIsChef] = useState(false);
+  const [chefName, setChefName] = useState('');
 
   // état de la manche
   const [roundNumber, setRoundNumber] = useState(0);
@@ -42,10 +43,12 @@ export function useGameLogic(pseudo) {
       setConnected(true);
       setGameStarted(gs);
       setIsChef(pseudo === chef);
+      setChefName(chef);
       setScores(Object.fromEntries(participants.map(p => [p, 0])));
       setAnnouncements([
-        `Participants : ${participants.join(', ')}`,
-        `Chef : ${chef}`
+        `Participants : ${participants
+          .map(p => (p === chef ? `👑${p}` : p))
+          .join(', ')}`
       ]);
     }
 
@@ -53,12 +56,14 @@ export function useGameLogic(pseudo) {
       setScores(prevScores => {
         const newScores = { ...prevScores, [newPseudo]: 0 };
         setAnnouncements([
-          `Participants : ${Object.keys(newScores).join(', ')}`,
-          `Chef : ${chef}`
+          `Participants : ${Object.keys(newScores)
+            .map(p => (p === chef ? `👑${p}` : p))
+            .join(', ')}`
         ]);
         return newScores;
       });
       setIsChef(pseudo === chef);
+      setChefName(chef);
     }
 
     // 2. Partie démarrée
@@ -171,6 +176,7 @@ export function useGameLogic(pseudo) {
     connected,
     gameStarted,
     isChef,
+    chefName,
     roundNumber,
     phase,
     timeLeft,
