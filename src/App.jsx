@@ -21,6 +21,13 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
+  // redirect to server list if a pseudo is already stored
+  useEffect(() => {
+    if (pseudo && route === '#/') {
+      navigate('#/servers');
+    }
+  }, [pseudo, route]);
+
   const updatePseudo = p => {
     setPseudo(p);
     if (p) {
