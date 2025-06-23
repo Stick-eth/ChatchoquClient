@@ -24,6 +24,7 @@ export function useGameLogic(pseudo) {
   const [lastAuthor, setLastAuthor] = useState(null);
   // paramètres envoyés par le serveur lors du démarrage
   const [gameSettings, setGameSettings] = useState(null);
+  const [currentRoom, setCurrentRoom] = useState('');
 
   // ─── TIMER : décrémente `timeLeft` chaque seconde ─────────────────────────
   useEffect(() => {
@@ -152,6 +153,7 @@ export function useGameLogic(pseudo) {
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
   function joinRoom({ roomCode, pseudo: p }) {
+    setCurrentRoom(roomCode);
     socket.emit('joinRoom', { roomCode, pseudo: p });
   }
 
@@ -179,6 +181,7 @@ export function useGameLogic(pseudo) {
     announcements,
     lastAuthor,
     gameSettings,
+    currentRoom,
     joinRoom,
     startGame,
     submitGuess,

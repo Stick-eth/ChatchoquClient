@@ -32,6 +32,7 @@ export default function App() {
     announcements,
     lastAuthor,
     gameSettings,
+    currentRoom,
     joinRoom,
     startGame,
     submitGuess,
@@ -92,6 +93,7 @@ export default function App() {
 
       {gameStarted && gameSettings && (
         <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#555' }}>
+          {currentRoom && <span>Salon {currentRoom} – </span>}
           Paramètres : {gameSettings.roundsTotal} manches –{' '}
           {gameSettings.messagesPerRound} messages/manche –{' '}
           {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'}
