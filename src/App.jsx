@@ -1,135 +1,61 @@
-// src/App.jsx
-import React, { useState } from 'react';
-import { useGameLogic } from './hooks/useGameLogic';
-import { JoinRoom } from './components/JoinRoom';
-import { GameHeader } from './components/GameHeader';
-import { ChatPanel } from './components/ChatPanel';
-import { Announcements } from './components/Announcements';
-import { Scores } from './components/Scores';
-import { GuessZone } from './components/GuessZone';
-import { RoundSummaryOverlay } from './components/RoundSummaryOverlay';
-import { GameEndOverlay } from './components/GameEndOverlay';
+import React, { useEffect, useState } from 'react';
+import GamePage from './pages/GamePage';
+import { ServerList } from './pages/ServerList';
+import { Home } from './pages/Home';
 
 export default function App() {
-  const [roomCode, setRoomCode] = useState('');
-  const [pseudo, setPseudo] = useState('');
-  const [roomParams, setRoomParams] = useState({
-    rounds: 10,
-    onlyGifs: false,
-    messagesPerRound: 1,
-    minMessageLength: 20,
-  });
+  const [pseudo, setPseudo] = useState(() => localStorage.getItem('pseudo') || '');
+  const [route, setRoute] = useState(window.location.hash || '#/');
 
-  const {
-    connected,
-    gameStarted,
-    isChef,
-    chefName,
-    roundNumber,
-    phase,
-    timeLeft,
-    guessOptions,
-    hasGuessed,
-    scores,
-    messages,
-    announcements,
-    lastAuthor,
-    lastProposals,
-    lastRoundPoints,
-    gameSettings,
-    currentRoom,
-    joinRoom,
-    startGame,
-    submitGuess,
-    restartLobby,
-    leaveRoom,
-    finalRanking,
-  } = useGameLogic(pseudo);
+  const navigate = hash => {
+    if (window.location.hash !== hash) {
+      window.location.hash = hash;
+    } else {
+      setRoute(hash);
+    }
+  };
 
-  const overlayVisible = phase === 'Résultat' || phase === 'Transition';
+  useEffect(() => {
+    const onHashChange = () => setRoute(window.location.hash || '#/');
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
-  // Écran de connexion tant que non connecté
-  if (!connected) {
+  // redirect to server list if a pseudo is already stored
+  useEffect(() => {
+    if (pseudo && route === '#/') {
+      navigate('#/servers');
+    }
+  }, [pseudo, route]);
+
+  const updatePseudo = p => {
+    setPseudo(p);
+    if (p) {
+      localStorage.setItem('pseudo', p);
+    } else {
+      localStorage.removeItem('pseudo');
+    }
+  };
+
+  if (!pseudo && route !== '#/') {
+    navigate('#/');
+    return null;
+  }
+
+  if (route.startsWith('#/room/')) {
+    const code = route.slice(7);
+    return <GamePage roomCode={code} pseudo={pseudo} onLeave={() => navigate('#/servers')} />;
+  }
+
+  if (route === '#/servers') {
     return (
-      <JoinRoom
-        roomCode={roomCode}
-        setRoomCode={setRoomCode}
+      <ServerList
         pseudo={pseudo}
-        setPseudo={setPseudo}
-        onJoin={({ roomCode, pseudo }) => joinRoom({ roomCode, pseudo })}
+        onJoin={code => navigate('#/room/' + code)}
+        onPseudoChange={updatePseudo}
       />
     );
   }
 
-  // Vue principale de la partie
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
-      <h1>
-        {gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}
-      </h1>
-
-      <button
-        onClick={() => {
-          if (window.confirm("Quitter la partie ?")) {
-            leaveRoom();
-          }
-        }}
-        style={{ position: 'absolute', top: '1rem', right: '1rem' }}
-      >
-        Quitter
-      </button>
-
-      <GameHeader
-        roundNumber={roundNumber}
-        phase={phase}
-        timeLeft={timeLeft}
-        isChef={isChef}
-        gameStarted={gameStarted}
-        roomParams={roomParams}
-        setRoomParams={setRoomParams}
-        onStart={() => startGame(roomParams)}
-      />
-
-      <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
-        <ChatPanel messages={messages} />
-
-        <div style={{ flex: 1 }}>
-          <Announcements announcements={announcements} />
-          <Scores scores={scores} chefName={chefName} />
-        </div>
-      </div>
-
-      <GuessZone
-        phase={phase}
-        guessOptions={guessOptions}
-        hasGuessed={hasGuessed}
-        onGuess={submitGuess}
-      />
-
-      <RoundSummaryOverlay
-        visible={overlayVisible}
-        author={lastAuthor}
-        scores={scores}
-        proposals={lastProposals}
-        roundPoints={lastRoundPoints}
-      />
-
-      <GameEndOverlay
-        visible={phase === 'Terminé'}
-        ranking={finalRanking}
-        isChef={isChef}
-        onRestart={restartLobby}
-        onQuit={leaveRoom}
-      />
-
-      {gameStarted && gameSettings && (
-        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#555' }}>
-          {currentRoom && <span>Salon {currentRoom} – </span>}
-          Paramètres : {gameSettings.roundsTotal} manches –{' '}
-          {gameSettings.messagesPerRound} messages/manche –{' '}
-          {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'} – Pav-o-meter {gameSettings.minMessageLength}
-        </div>
-      )}
-    </div>
-  );
+  return <Home onConfirm={p => { updatePseudo(p); navigate('#/servers'); }} />;
 }
