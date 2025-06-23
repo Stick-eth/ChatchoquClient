@@ -56,7 +56,9 @@ export default function App() {
   // Vue principale de la partie
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
-      <h1>Devine l'auteur</h1>
+      <h1>
+        {gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}
+      </h1>
 
       <GameHeader
         roundNumber={roundNumber}
