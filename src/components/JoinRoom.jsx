@@ -27,7 +27,7 @@ export function JoinRoom({ roomCode, setRoomCode, pseudo, setPseudo, onJoin }) {
       </div>
       <div style={{ marginBottom: '1rem' }}>
         <input
-          placeholder="Code salon"
+          placeholder="Code salon (6 chiffres)"
           value={roomCode}
           onChange={e => {
             const value = e.target.value;
@@ -45,10 +45,20 @@ export function JoinRoom({ roomCode, setRoomCode, pseudo, setPseudo, onJoin }) {
         {rooms.map(r => (
           <li key={r.roomCode} style={{ marginBottom: '0.5rem' }}>
             <button
-              style={{ width: '100%' }}
+              style={{
+                width: '100%',
+                padding: '0.75rem',
+                textAlign: 'center',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                background: '#f8f8f8',
+              }}
               onClick={() => onJoin({ roomCode: r.roomCode, pseudo })}
             >
-              {`#${r.roomCode} – ${r.chef} (${r.playerCount})`}
+              <div style={{ fontSize: '1.25rem' }}>#{r.roomCode}</div>
+              <div style={{ fontSize: '0.8rem', color: '#666' }}>{r.chef}</div>
+              <hr style={{ width: '33%', margin: '0.5rem auto' }} />
+              <div>{r.playerCount} joueur{r.playerCount > 1 ? 's' : ''}</div>
             </button>
           </li>
         ))}
