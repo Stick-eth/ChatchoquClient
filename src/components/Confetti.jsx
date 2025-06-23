@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
+const PIECE_COUNT = 80;
+
 export function Confetti({ active, style }) {
   const [pieces, setPieces] = useState([]);
 
   useEffect(() => {
     if (!active) return;
-    const newPieces = Array.from({ length: 40 }).map(() => ({
+    const newPieces = Array.from({ length: PIECE_COUNT }).map(() => ({
       left: Math.random() * 100,
       bg: `hsl(${Math.random() * 360},100%,50%)`,
       delay: Math.random() * 0.5,
