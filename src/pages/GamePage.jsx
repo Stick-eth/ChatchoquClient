@@ -65,6 +65,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
           if (window.confirm('Quitter la partie ?')) {
             leaveRoom();
             if (onLeave) onLeave();
+            window.location.reload();
           }
         }}
         style={{ position: 'absolute', top: '1rem', right: '1rem' }}
@@ -115,6 +116,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         onQuit={() => {
           leaveRoom();
           if (onLeave) onLeave();
+          window.location.reload();
         }}
       />
 
