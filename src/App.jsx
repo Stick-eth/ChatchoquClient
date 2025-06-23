@@ -12,6 +12,11 @@ import { RoundSummaryOverlay } from './components/RoundSummaryOverlay';
 export default function App() {
   const [roomCode, setRoomCode] = useState('');
   const [pseudo, setPseudo] = useState('');
+  const [roomParams, setRoomParams] = useState({
+    rounds: 10,
+    onlyGifs: false,
+    messagesPerRound: 1,
+  });
 
   const {
     connected,
@@ -57,7 +62,9 @@ export default function App() {
         timeLeft={timeLeft}
         isChef={isChef}
         gameStarted={gameStarted}
-        onStart={startGame}
+        roomParams={roomParams}
+        setRoomParams={setRoomParams}
+        onStart={() => startGame(roomParams)}
       />
 
       <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
