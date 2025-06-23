@@ -209,8 +209,8 @@ export function useGameLogic(pseudo) {
     socket.emit('restartLobby');
   }
 
-  function leaveRoom() {
-    socket.emit('leaveRoom');
+  function leaveRoom(code = currentRoom) {
+    socket.emit('leaveRoom', { roomCode: code, pseudo });
     // reset local state
     setConnected(false);
     setGameStarted(false);

@@ -51,6 +51,14 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
+  useEffect(() => {
+    return () => {
+      leaveRoom();
+      if (onLeave) onLeave();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Loading screen while connecting
   if (!connected) {
     return <div style={{ padding: '2rem' }}>Connexion…</div>;
