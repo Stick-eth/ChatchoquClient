@@ -22,6 +22,9 @@ export function useGameLogic(pseudo) {
 
   // **nouveau** : on stocke l’auteur de la manche qui vient de se terminer
   const [lastAuthor, setLastAuthor] = useState(null);
+  // paramètres envoyés par le serveur lors du démarrage
+  const [gameSettings, setGameSettings] = useState(null);
+  const [currentRoom, setCurrentRoom] = useState('');
 
   // ─── TIMER : décrémente `timeLeft` chaque seconde ─────────────────────────
   useEffect(() => {
@@ -59,8 +62,9 @@ export function useGameLogic(pseudo) {
     }
 
     // 2. Partie démarrée
-    function handleGameStarted() {
+    function handleGameStarted({ roundsTotal, messagesPerRound, onlyGifs }) {
       setGameStarted(true);
+      setGameSettings({ roundsTotal, messagesPerRound, onlyGifs });
     }
 
     // 3. Nouvelle manche : phase "Réflexion"
@@ -149,6 +153,7 @@ export function useGameLogic(pseudo) {
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
   function joinRoom({ roomCode, pseudo: p }) {
+    setCurrentRoom(roomCode);
     socket.emit('joinRoom', { roomCode, pseudo: p });
   }
 
@@ -175,6 +180,8 @@ export function useGameLogic(pseudo) {
     messages,
     announcements,
     lastAuthor,
+    gameSettings,
+    currentRoom,
     joinRoom,
     startGame,
     submitGuess,

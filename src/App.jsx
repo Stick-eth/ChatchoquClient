@@ -31,6 +31,8 @@ export default function App() {
     messages,
     announcements,
     lastAuthor,
+    gameSettings,
+    currentRoom,
     joinRoom,
     startGame,
     submitGuess,
@@ -54,7 +56,9 @@ export default function App() {
   // Vue principale de la partie
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif', position: 'relative' }}>
-      <h1>Devine l'auteur</h1>
+      <h1>
+        {gameStarted ? "Devine l'auteur" : `Room #${currentRoom}`}
+      </h1>
 
       <GameHeader
         roundNumber={roundNumber}
@@ -88,6 +92,15 @@ export default function App() {
         author={lastAuthor}
         scores={scores}
       />
+
+      {gameStarted && gameSettings && (
+        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#555' }}>
+          {currentRoom && <span>Salon {currentRoom} – </span>}
+          Paramètres : {gameSettings.roundsTotal} manches –{' '}
+          {gameSettings.messagesPerRound} messages/manche –{' '}
+          {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'}
+        </div>
+      )}
     </div>
   );
 }
