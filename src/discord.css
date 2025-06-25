@@ -137,3 +137,17 @@ input {
     transform: translateY(100vh) rotate(720deg);
   }
 }
+
+/* ─── Guess buttons ─────────────────────────────────────────────────────── */
+.guess-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.guess-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}

@@ -9,7 +9,13 @@ export function GuessZone({ phase, guessOptions, hasGuessed, onGuess }) {
           key={u}
           disabled={hasGuessed}
           onClick={() => onGuess(u)}
+          className="guess-button"
         >
+          <img
+            src={`/assets/pfp/${u}.png`}
+            alt={u}
+            className="guess-img"
+          />
           {u}
         </button>
       ))}
