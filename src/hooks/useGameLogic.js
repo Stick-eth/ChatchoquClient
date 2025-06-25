@@ -16,6 +16,7 @@ export function useGameLogic(pseudo) {
   const [guessOptions, setGuessOptions] = useState([]);
   const [hasGuessed, setHasGuessed] = useState(false);
   const [scores, setScores] = useState({});
+  const [playersGuessed, setPlayersGuessed] = useState([]);
 
   // affichage
   const [messages, setMessages] = useState([]);
@@ -99,6 +100,7 @@ export function useGameLogic(pseudo) {
       setScores(sc);
       setGuessOptions(go);
       setHasGuessed(false);
+      setPlayersGuessed([]);
       setMessages([]);
       setAnnouncements([]);
       setLastAuthor(null);  // on réinitialise l’auteur précédent
@@ -112,6 +114,12 @@ export function useGameLogic(pseudo) {
         ...msgs,
         { content: messagePart, timestamp: new Date(), type: 'chat' }
       ]);
+    }
+
+    function handlePlayerGuessed({ pseudo: guessedPseudo }) {
+      setPlayersGuessed(pg =>
+        pg.includes(guessedPseudo) ? pg : [...pg, guessedPseudo]
+      );
     }
 
     // 5. Fin de manche : phase "Résultat"
@@ -143,6 +151,7 @@ export function useGameLogic(pseudo) {
     function handleGameEnded({ finalRanking }) {
       setPhase('Terminé');
       setTimeLeft(0);
+      setPlayersGuessed([]);
       setFinalRanking(finalRanking);
       setAnnouncements([
         'Partie terminée ! Classement final :',
@@ -158,6 +167,7 @@ export function useGameLogic(pseudo) {
       setScores(Object.fromEntries(participants.map(p => [p, 0])));
       setGuessOptions([]);
       setMessages([]);
+      setPlayersGuessed([]);
       setAnnouncements([
         `Participants : ${participants.join(', ')}`,
         `Chef : ${chef}`,
@@ -182,6 +192,7 @@ export function useGameLogic(pseudo) {
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
     socket.on('messageRevealed', handleMessageRevealed);
+    socket.on('playerGuessed', handlePlayerGuessed);
     socket.on('roundEnded', handleRoundEnded);
     socket.on('transitionStarted', handleTransitionStarted);
     socket.on('gameEnded', handleGameEnded);
@@ -196,6 +207,7 @@ export function useGameLogic(pseudo) {
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
       socket.off('messageRevealed', handleMessageRevealed);
+      socket.off('playerGuessed', handlePlayerGuessed);
       socket.off('roundEnded', handleRoundEnded);
       socket.off('transitionStarted', handleTransitionStarted);
       socket.off('gameEnded', handleGameEnded);
@@ -217,6 +229,7 @@ export function useGameLogic(pseudo) {
   function submitGuess(guess) {
     socket.emit('submitGuess', { guess });
     setHasGuessed(true);
+    setPlayersGuessed(pg => (pg.includes(pseudo) ? pg : [...pg, pseudo]));
   }
 
   function restartLobby() {
@@ -234,6 +247,7 @@ export function useGameLogic(pseudo) {
     setTimeLeft(0);
     setGuessOptions([]);
     setHasGuessed(false);
+    setPlayersGuessed([]);
     setScores({});
     setMessages([]);
     setAnnouncements([]);
@@ -257,6 +271,7 @@ export function useGameLogic(pseudo) {
     guessOptions,
     hasGuessed,
     scores,
+    playersGuessed,
     messages,
     announcements,
     lastAuthor,
