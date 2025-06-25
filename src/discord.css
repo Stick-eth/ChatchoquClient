@@ -156,7 +156,18 @@ input {
     #4b0082,
     #8b00ff
   );
+  background-size: 400% 100%;
+  animation: rainbow-scroll 8s linear infinite;
   color: #fff;
+}
+
+@keyframes rainbow-scroll {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
 }
 
 .guess-img {
