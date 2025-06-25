@@ -27,6 +27,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     guessOptions,
     hasGuessed,
     scores,
+    playersGuessed,
     messages,
     announcements,
     lastAuthor,
@@ -86,7 +87,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         />
 
         <Announcements announcements={announcements} />
-        <Scores scores={scores} chefName={chefName} />
+        <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
       </div>
     );
   }
@@ -123,7 +124,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         <ChatPanel messages={messages} />
 
         <div className="sidebar">
-          <Scores scores={scores} chefName={chefName} />
+          <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
         </div>
       </div>
 
