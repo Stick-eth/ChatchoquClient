@@ -12,7 +12,7 @@ export function GuessZone({ phase, guessOptions, hasGuessed, onGuess }) {
           className="guess-button"
         >
           <img
-            src={`/assets/pfp/${u}.png`}
+            src={`src/assets/pfp/${u}.png`}
             alt={u}
             className="guess-img"
           />
