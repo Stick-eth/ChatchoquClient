@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function GuessZone({ phase, guessOptions, hasGuessed, onGuess }) {
+export function GuessZone({ phase, guessOptions, hasGuessed, selectedGuess, onGuess }) {
   if (phase !== 'Réflexion') return null;
   return (
     <div style={{ marginTop: '1rem' }}>
@@ -9,7 +9,9 @@ export function GuessZone({ phase, guessOptions, hasGuessed, onGuess }) {
           key={u}
           disabled={hasGuessed}
           onClick={() => onGuess(u)}
-          className="guess-button"
+          className={`guess-button${
+            hasGuessed && selectedGuess === u ? ' guess-selected' : ''
+          }`}
         >
           <img
             src={`src/assets/pfp/${u}.png`}

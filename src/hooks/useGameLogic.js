@@ -15,6 +15,7 @@ export function useGameLogic(pseudo) {
   const [timeLeft, setTimeLeft] = useState(0);       // ← compte-à-rebours
   const [guessOptions, setGuessOptions] = useState([]);
   const [hasGuessed, setHasGuessed] = useState(false);
+  const [myGuess, setMyGuess] = useState(null);
   const [scores, setScores] = useState({});
   const [playersGuessed, setPlayersGuessed] = useState([]);
 
@@ -100,6 +101,7 @@ export function useGameLogic(pseudo) {
       setScores(sc);
       setGuessOptions(go);
       setHasGuessed(false);
+      setMyGuess(null);
       setPlayersGuessed([]);
       setMessages([]);
       setAnnouncements([]);
@@ -229,6 +231,7 @@ export function useGameLogic(pseudo) {
   function submitGuess(guess) {
     socket.emit('submitGuess', { guess });
     setHasGuessed(true);
+    setMyGuess(guess);
     setPlayersGuessed(pg => (pg.includes(pseudo) ? pg : [...pg, pseudo]));
   }
 
@@ -247,6 +250,7 @@ export function useGameLogic(pseudo) {
     setTimeLeft(0);
     setGuessOptions([]);
     setHasGuessed(false);
+    setMyGuess(null);
     setPlayersGuessed([]);
     setScores({});
     setMessages([]);
@@ -270,6 +274,7 @@ export function useGameLogic(pseudo) {
     timeLeft,
     guessOptions,
     hasGuessed,
+    myGuess,
     scores,
     playersGuessed,
     messages,

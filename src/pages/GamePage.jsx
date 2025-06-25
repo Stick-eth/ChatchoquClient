@@ -26,6 +26,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     timeLeft,
     guessOptions,
     hasGuessed,
+    myGuess,
     scores,
     playersGuessed,
     messages,
@@ -132,6 +133,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         phase={phase}
         guessOptions={guessOptions}
         hasGuessed={hasGuessed}
+        selectedGuess={myGuess}
         onGuess={submitGuess}
       />
 
