@@ -145,6 +145,20 @@ input {
   gap: 0.5rem;
 }
 
+.guess-button.guess-selected:disabled {
+  background: linear-gradient(
+    90deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #8b00ff
+  );
+  color: #fff;
+}
+
 .guess-img {
   width: 32px;
   height: 32px;
