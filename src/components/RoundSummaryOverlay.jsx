@@ -9,6 +9,11 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
   return (
     <div className="modal-overlay">
       <div className="modal">
+        <img
+          src={`src/assets/pfp/${author}.png`}
+          alt={author}
+          className="round-author-img"
+        />
         <h2>L'auteur était {author}</h2>
         <h3>Classement</h3>
         <ol style={{ textAlign: 'left' }}>
