@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { GameHeader } from '../components/GameHeader';
 import { ChatPanel } from '../components/ChatPanel';
+import { ChatBox } from '../components/ChatBox';
 import { Announcements } from '../components/Announcements';
 import { Scores } from '../components/Scores';
 import { GuessZone } from '../components/GuessZone';
@@ -42,6 +43,8 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     restartLobby,
     leaveRoom,
     finalRanking,
+    chatMessages,
+    sendChatMessage,
   } = useGameLogic(pseudo);
 
   // join room automatically when not connected
@@ -87,8 +90,14 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
           onStart={() => startGame(roomParams)}
         />
 
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <ChatBox messages={chatMessages} onSend={sendChatMessage} />
+          <div className="sidebar">
+            <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
+          </div>
+        </div>
+
         <Announcements announcements={announcements} />
-        <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
       </div>
     );
   }
@@ -126,6 +135,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
         <div className="sidebar">
           <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
+          <ChatBox messages={chatMessages} onSend={sendChatMessage} />
         </div>
       </div>
 

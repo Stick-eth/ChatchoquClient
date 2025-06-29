@@ -22,6 +22,7 @@ export function useGameLogic(pseudo) {
   // affichage
   const [messages, setMessages] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
 
   // **nouveau** : on stocke l’auteur de la manche qui vient de se terminer
   const [lastAuthor, setLastAuthor] = useState(null);
@@ -187,6 +188,13 @@ export function useGameLogic(pseudo) {
       setAnnouncements(a => [...a, `Erreur : ${msg}`]);
     }
 
+    function handleChatMessage({ pseudo: author, message }) {
+      setChatMessages(msgs => [
+        ...msgs,
+        { pseudo: author, message, timestamp: new Date() },
+      ]);
+    }
+
     // Enregistrement des handlers
     socket.on('roomData', handleRoomData);
     socket.on('userJoined', handleUserJoined);
@@ -200,6 +208,7 @@ export function useGameLogic(pseudo) {
     socket.on('gameEnded', handleGameEnded);
     socket.on('lobbyRestarted', handleLobbyRestarted);
     socket.on('errorMessage', handleErrorMessage);
+    socket.on('chatMessage', handleChatMessage);
 
     // Cleanup
     return () => {
@@ -215,6 +224,7 @@ export function useGameLogic(pseudo) {
       socket.off('gameEnded', handleGameEnded);
       socket.off('lobbyRestarted', handleLobbyRestarted);
       socket.off('errorMessage', handleErrorMessage);
+      socket.off('chatMessage', handleChatMessage);
     };
   }, [pseudo, roundNumber, lastAuthor, chefName]);
 
@@ -239,6 +249,10 @@ export function useGameLogic(pseudo) {
     socket.emit('restartLobby');
   }
 
+  function sendChatMessage(message) {
+    socket.emit('sendChatMessage', { message });
+  }
+
   function leaveRoom() {
     socket.emit('leaveRoom');
     // reset local state
@@ -254,6 +268,7 @@ export function useGameLogic(pseudo) {
     setPlayersGuessed([]);
     setScores({});
     setMessages([]);
+    setChatMessages([]);
     setAnnouncements([]);
     setLastAuthor(null);
     setLastProposals({});
@@ -289,6 +304,8 @@ export function useGameLogic(pseudo) {
     submitGuess,
     restartLobby,
     leaveRoom,
+    sendChatMessage,
     finalRanking,
+    chatMessages,
   };
 }

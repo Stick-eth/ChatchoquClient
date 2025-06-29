@@ -68,6 +68,22 @@ input {
   flex-direction: column;
 }
 
+.chat-box {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-input {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-input input {
+  flex: 1;
+}
+
 .chat-message {
   margin-bottom: 0.5rem;
 }
