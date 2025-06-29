@@ -1,5 +1,5 @@
 // src/hooks/useGameLogic.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { socket } from '../socket';
 
 export function useGameLogic(pseudo) {
@@ -17,6 +17,7 @@ export function useGameLogic(pseudo) {
   const [hasGuessed, setHasGuessed] = useState(false);
   const [myGuess, setMyGuess] = useState(null);
   const [scores, setScores] = useState({});
+  const scoresRef = useRef({});
   const [playersGuessed, setPlayersGuessed] = useState([]);
 
   // affichage
@@ -34,6 +35,11 @@ export function useGameLogic(pseudo) {
   const [gameSettings, setGameSettings] = useState(null);
   const [currentRoom, setCurrentRoom] = useState('');
   const [finalRanking, setFinalRanking] = useState([]);
+
+  // store latest scores for callbacks
+  useEffect(() => {
+    scoresRef.current = scores;
+  }, [scores]);
 
   // ─── TIMER : décrémente `timeLeft` chaque seconde ─────────────────────────
   useEffect(() => {
@@ -85,6 +91,16 @@ export function useGameLogic(pseudo) {
         ]);
         return newScores;
       });
+    }
+
+    function handleChefChanged({ chef }) {
+      setChefName(chef);
+      setIsChef(pseudo === chef);
+      setAnnouncements([
+        `Participants : ${Object.keys(scoresRef.current)
+          .map(p => (p === chef ? `👑${p}` : p))
+          .join(', ')}`
+      ]);
     }
 
     // 2. Partie démarrée
@@ -199,6 +215,7 @@ export function useGameLogic(pseudo) {
     socket.on('roomData', handleRoomData);
     socket.on('userJoined', handleUserJoined);
     socket.on('playerLeft', handlePlayerLeft);
+    socket.on('chefChanged', handleChefChanged);
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
     socket.on('messageRevealed', handleMessageRevealed);
@@ -215,6 +232,7 @@ export function useGameLogic(pseudo) {
       socket.off('roomData', handleRoomData);
       socket.off('userJoined', handleUserJoined);
       socket.off('playerLeft', handlePlayerLeft);
+      socket.off('chefChanged', handleChefChanged);
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
       socket.off('messageRevealed', handleMessageRevealed);
