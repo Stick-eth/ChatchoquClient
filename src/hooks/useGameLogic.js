@@ -1,5 +1,5 @@
 // src/hooks/useGameLogic.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { socket } from '../socket';
 
 export function useGameLogic(pseudo) {
@@ -229,31 +229,31 @@ export function useGameLogic(pseudo) {
   }, [pseudo, roundNumber, lastAuthor, chefName]);
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
-  function joinRoom({ roomCode, pseudo: p }) {
+  const joinRoom = useCallback(({ roomCode, pseudo: p }) => {
     setCurrentRoom(roomCode);
     socket.emit('joinRoom', { roomCode, pseudo: p });
-  }
+  }, []);
 
-  function startGame(params = {}) {
+  const startGame = useCallback((params = {}) => {
     socket.emit('startGame', params);
-  }
+  }, []);
 
-  function submitGuess(guess) {
+  const submitGuess = useCallback(guess => {
     socket.emit('submitGuess', { guess });
     setHasGuessed(true);
     setMyGuess(guess);
     setPlayersGuessed(pg => (pg.includes(pseudo) ? pg : [...pg, pseudo]));
-  }
+  }, [pseudo]);
 
-  function restartLobby() {
+  const restartLobby = useCallback(() => {
     socket.emit('restartLobby');
-  }
+  }, []);
 
-  function sendChatMessage(message) {
+  const sendChatMessage = useCallback(message => {
     socket.emit('sendChatMessage', { message });
-  }
+  }, []);
 
-  function leaveRoom() {
+  const leaveRoom = useCallback(() => {
     socket.emit('leaveRoom');
     // reset local state
     setConnected(false);
@@ -276,7 +276,7 @@ export function useGameLogic(pseudo) {
     setGameSettings(null);
     setCurrentRoom('');
     setFinalRanking([]);
-  }
+  }, []);
 
   // ─── VALEURS EXPOSEES AU COMPOSANT ────────────────────────────────────────
   return {
