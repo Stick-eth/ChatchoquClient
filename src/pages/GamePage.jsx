@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { GameHeader } from '../components/GameHeader';
 import { ChatPanel } from '../components/ChatPanel';
@@ -16,6 +16,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     messagesPerRound: 1,
     minMessageLength: 20,
   });
+  const hasJoinedRef = useRef(false);
 
   const {
     connected,
@@ -47,12 +48,18 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
     sendChatMessage,
   } = useGameLogic(pseudo);
 
-  // join room automatically when not connected
+  // join room automatically once
   useEffect(() => {
-    if (!connected && roomCode && pseudo) {
+    if (!hasJoinedRef.current && roomCode && pseudo) {
       joinRoom({ roomCode, pseudo });
+      hasJoinedRef.current = true;
     }
-  }, [connected, roomCode, pseudo, joinRoom]);
+  }, [roomCode, pseudo, joinRoom]);
+
+  const handleLeave = () => {
+    leaveRoom();
+    hasJoinedRef.current = false;
+  };
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
@@ -69,7 +76,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         <button
           onClick={() => {
             if (window.confirm('Quitter la partie ?')) {
-              leaveRoom();
+              handleLeave();
               if (onLeave) onLeave();
               window.location.reload();
             }
@@ -109,7 +116,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
       <button
         onClick={() => {
           if (window.confirm('Quitter la partie ?')) {
-            leaveRoom();
+            handleLeave();
             if (onLeave) onLeave();
             window.location.reload();
           }
@@ -162,7 +169,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         isChef={isChef}
         onRestart={restartLobby}
         onQuit={() => {
-          leaveRoom();
+          handleLeave();
           if (onLeave) onLeave();
           window.location.reload();
         }}
