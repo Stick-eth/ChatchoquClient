@@ -10,6 +10,7 @@ import { RoundSummaryOverlay } from '../components/RoundSummaryOverlay';
 import { GameEndOverlay } from '../components/GameEndOverlay';
 
 export default function GamePage({ roomCode, pseudo, onLeave }) {
+  const [joinAttempted, setJoinAttempted] = useState(false);
   const [roomParams, setRoomParams] = useState({
     rounds: 10,
     onlyGifs: false,
@@ -49,10 +50,20 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
 
   // join room automatically when not connected
   useEffect(() => {
-    if (!connected && roomCode && pseudo) {
+    if (!connected && roomCode && pseudo && !joinAttempted) {
       joinRoom({ roomCode, pseudo });
+      setJoinAttempted(true);
     }
-  }, [connected, roomCode, pseudo, joinRoom]);
+  }, [connected, roomCode, pseudo, joinAttempted, joinRoom]);
+
+  const handleQuit = () => {
+    if (window.confirm('Quitter la partie ?')) {
+      setJoinAttempted(true);
+      leaveRoom();
+      if (onLeave) onLeave();
+      window.location.reload();
+    }
+  };
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
@@ -67,13 +78,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         <h1>{`Room #${currentRoom}`}</h1>
 
         <button
-          onClick={() => {
-            if (window.confirm('Quitter la partie ?')) {
-              leaveRoom();
-              if (onLeave) onLeave();
-              window.location.reload();
-            }
-          }}
+          onClick={handleQuit}
           style={{ position: 'absolute', top: '1rem', right: '1rem' }}
         >
           Quitter
@@ -107,13 +112,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
       <h1>{gameStarted ? 'TerraGuessr' : `Room #${currentRoom}`}</h1>
 
       <button
-        onClick={() => {
-          if (window.confirm('Quitter la partie ?')) {
-            leaveRoom();
-            if (onLeave) onLeave();
-            window.location.reload();
-          }
-        }}
+        onClick={handleQuit}
         style={{ position: 'absolute', top: '1rem', right: '1rem' }}
       >
         Quitter
@@ -161,11 +160,7 @@ export default function GamePage({ roomCode, pseudo, onLeave }) {
         ranking={finalRanking}
         isChef={isChef}
         onRestart={restartLobby}
-        onQuit={() => {
-          leaveRoom();
-          if (onLeave) onLeave();
-          window.location.reload();
-        }}
+        onQuit={handleQuit}
       />
 
       {gameStarted && gameSettings && (
