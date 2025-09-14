@@ -836,3 +836,29 @@ strong { font-weight: 700; }
   .chat-sheet h3 { color: #2f3441; }
   .chat-sheet .chat-panel { max-height: 50vh; overflow-y: auto; }
 }
+
+/* ─── Surélévation de l’input existant quand overlay ouvert ────────────── */
+html.overlay-open .chat-input,
+html.overlay-open .chat-input-floating {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 200; /* au-dessus des overlays */
+  display: flex;
+  justify-content: center;
+  padding: 0 0.75rem;
+}
+html.overlay-open .chat-input .chat-input-inner,
+html.overlay-open .chat-input-floating .chat-input-inner {
+  display: flex;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-pixel);
+  padding: 0.5rem;
+  width: min(880px, 100%);
+}
+html.overlay-open .chat-input input,
+html.overlay-open .chat-input-floating input {
+  flex: 1;
+}

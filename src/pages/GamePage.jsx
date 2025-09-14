@@ -85,6 +85,40 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
+  // Ajouter/retirer une classe globale pour surélever l'input du chat au-dessus des overlays
+  useEffect(() => {
+    const root = document.documentElement;
+    if (overlayVisible) root.classList.add('overlay-open');
+    else root.classList.remove('overlay-open');
+    return () => root.classList.remove('overlay-open');
+  }, [overlayVisible]);
+
+  // Saisie par défaut: rediriger les frappes clavier vers l'input du chat si l'utilisateur tape hors champ
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const t = e.target;
+      const isFormField = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+      if (isFormField) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!e.key) return;
+      // N'intercepter que les caractères imprimables (y compris espace)
+      const isPrintable = e.key.length === 1;
+      if (!isPrintable) return;
+      // Trouver un input de chat visible
+      const candidate = document.querySelector('.chat-input input, .chat-input-floating input');
+      if (!candidate) return;
+      // Vérifier visibilité
+      const style = window.getComputedStyle(candidate);
+      const visible = style.display !== 'none' && style.visibility !== 'hidden' && candidate.offsetParent !== null;
+      if (!visible) return;
+      // Empêcher la frappe d'aller ailleurs, puis demander au ChatBox d'insérer le texte
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent('chatbox-insert-text', { detail: { text: e.key } }));
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, []);
+
   // Loading screen while connecting
   if (!connected) {
     return <div className="container">Connexion…</div>;

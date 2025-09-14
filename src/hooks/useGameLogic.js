@@ -57,54 +57,18 @@ export function useGameLogic(pseudo) {
 
   // ─── SOCKET EVENTS ────────────────────────────────────────────────────────
   useEffect(() => {
-    // 1. Nouvelle salle / participants
-    function handleRoomData({ participants, chef, gameStarted: gs, datasetReady: ready, datasetMeta }) {
+    // 1. État autoritatif de la room (participants, chef, dataset, etc.)
+    function handleRoomState({ participants, chef, gameStarted: gs, datasetReady: ready, datasetMeta }) {
       setConnected(true);
       setGameStarted(gs);
       setIsChef(pseudo === chef);
-      setChefName(chef);
-      setScores(Object.fromEntries(participants.map(p => [p, 0])));
+      setChefName(chef || '');
+      setScores(Object.fromEntries((participants || []).map(p => [p, scoresRef.current[p] ?? 0])));
       setFinalRanking([]);
       setDatasetReady(!!ready);
       if (datasetMeta) setDatasetInfo(datasetMeta);
       setAnnouncements([
-        `Participants : ${participants
-          .map(p => (p === chef ? `👑${p}` : p))
-          .join(', ')}`
-      ]);
-    }
-
-    function handleUserJoined({ pseudo: newPseudo, chef }) {
-      setScores(prevScores => {
-        const newScores = { ...prevScores, [newPseudo]: 0 };
-        setAnnouncements([
-          `Participants : ${Object.keys(newScores)
-            .map(p => (p === chef ? `👑${p}` : p))
-            .join(', ')}`
-        ]);
-        return newScores;
-      });
-      setIsChef(pseudo === chef);
-      setChefName(chef);
-    }
-
-    function handlePlayerLeft({ pseudo: leftPseudo }) {
-      setScores(prevScores => {
-        const { [leftPseudo]: _removed, ...newScores } = prevScores;
-        setAnnouncements([
-          `Participants : ${Object.keys(newScores)
-            .map(p => (p === chefName ? `👑${p}` : p))
-            .join(', ')}`
-        ]);
-        return newScores;
-      });
-    }
-
-    function handleChefChanged({ chef }) {
-      setChefName(chef);
-      setIsChef(pseudo === chef);
-      setAnnouncements([
-        `Participants : ${Object.keys(scoresRef.current)
+        `Participants : ${(participants || [])
           .map(p => (p === chef ? `👑${p}` : p))
           .join(', ')}`
       ]);
@@ -228,10 +192,15 @@ export function useGameLogic(pseudo) {
     }
 
     // Enregistrement des handlers
-    socket.on('roomData', handleRoomData);
-    socket.on('userJoined', handleUserJoined);
-    socket.on('playerLeft', handlePlayerLeft);
-    socket.on('chefChanged', handleChefChanged);
+    socket.on('roomData', handleRoomState); // compat initiale
+    socket.on('roomState', handleRoomState);
+    // compat: on garde playerLeft/chefChanged pour annonces, mais l'état vient de roomState
+    socket.on('playerLeft', ({ pseudo: leftPseudo }) => {
+      setAnnouncements(a => [...a, `${leftPseudo} a quitté la room`]);
+    });
+    socket.on('chefChanged', ({ chef }) => {
+      setAnnouncements(a => [...a, `Nouveau chef: ${chef}`]);
+    });
   socket.on('datasetUpdated', handleDatasetUpdated);
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
@@ -246,10 +215,10 @@ export function useGameLogic(pseudo) {
 
     // Cleanup
     return () => {
-      socket.off('roomData', handleRoomData);
-      socket.off('userJoined', handleUserJoined);
-      socket.off('playerLeft', handlePlayerLeft);
-      socket.off('chefChanged', handleChefChanged);
+  socket.off('roomData', handleRoomState);
+  socket.off('roomState', handleRoomState);
+  socket.off('playerLeft');
+  socket.off('chefChanged');
       socket.off('datasetUpdated', handleDatasetUpdated);
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
