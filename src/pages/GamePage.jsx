@@ -275,6 +275,7 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
         proposals={lastProposals}
         roundPoints={lastRoundPoints}
         myPseudo={pseudo}
+        messages={messages}
       />
 
       <GameEndOverlay
