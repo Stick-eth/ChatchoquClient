@@ -211,7 +211,18 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
       />
 
       <div className="row-wrap game-layout" style={{ gap: '1rem', marginTop: '1rem' }}>
-        <ChatPanel messages={messages} />
+        <div className="game-main">
+          <ChatPanel messages={messages} />
+          <div className="guess-zone">
+            <GuessZone
+              phase={phase}
+              guessOptions={guessOptions}
+              hasGuessed={hasGuessed}
+              selectedGuess={myGuess}
+              onGuess={submitGuess}
+            />
+          </div>
+        </div>
 
         <div className="sidebar">
           <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
@@ -222,13 +233,6 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
         </div>
       </div>
 
-      <GuessZone
-        phase={phase}
-        guessOptions={guessOptions}
-        hasGuessed={hasGuessed}
-        selectedGuess={myGuess}
-        onGuess={submitGuess}
-      />
 
       <RoundSummaryOverlay
         visible={overlayVisible}

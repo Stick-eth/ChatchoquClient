@@ -27,6 +27,8 @@
   --grid-size: 48px; /* doublée */
   --grid-line: rgba(255, 255, 255, 0.08);
   --grid-major-line: rgba(255, 255, 255, 0.16); /* ligne épaisse (plus visible) */
+  /* Couleur d'ombre bleue spécifique aux boutons */
+  --btn-shadow-color: color-mix(in oklab, var(--color-secondary) 92%, transparent);
 }
 
 /* ============ Animations cartoon 8-bit (sans flou) ============ */
@@ -95,18 +97,19 @@ button {
   border-radius: var(--radius-sm);
   padding: 0.65rem 1.1rem;
   cursor: pointer;
-  box-shadow: var(--shadow-pixel);
+  box-shadow: 0 6px 0 var(--btn-shadow-color); /* ombre inférieure bleue uniquement pour boutons */
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+  font-weight: 600; /* semi-bold pour un rendu moins massif */
 }
 button:hover {
   filter: brightness(1.02);
   transform: translateY(-2px);
   animation: btn-hover-pop 220ms cubic-bezier(0.2, 0.9, 0.2, 1) 1 both;
-  box-shadow: var(--shadow-pixel);
+  box-shadow: 0 6px 0 var(--btn-shadow-color);
 }
 button:active {
   transform: translateY(4px) scaleY(0.96);
-  box-shadow: var(--shadow-pixel-pressed);
+  box-shadow: 0 3px 0 var(--btn-shadow-color);
   filter: none;
 }
 button:disabled {
@@ -186,7 +189,7 @@ input:focus {
   padding: 1.1rem;
   border-radius: var(--radius);
   border: 2px solid var(--border-color);
-  box-shadow: var(--shadow-pixel);
+  box-shadow: var(--shadow-pixel); /* ombre neutre (grise) pour containers */
   transition: transform 160ms ease, box-shadow 160ms ease;
   /* Variables locales: texte sombre dans la carte */
   --text-primary: #2f3441;
@@ -212,7 +215,9 @@ input:focus {
   background: color-mix(in oklab, var(--bg-tertiary) calc(var(--surface-alpha)*100%), transparent);
   border-radius: var(--radius);
   padding: 1rem;
-  height: 480px;
+  /* Plutôt que hauteur fixe, on laisse le container parent décider. */
+  min-height: 220px; /* assez pour 1-2 bulles courtes */
+  max-height: 65vh; /* borne sur desktop pour laisser place à sidebar/guesses */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -221,7 +226,7 @@ input:focus {
   --text-secondary: #6b7280;
   color: var(--text-primary);
   position: relative;
-  box-shadow: var(--shadow-pixel);
+  box-shadow: var(--shadow-pixel); /* ombre neutre pour containers */
 }
 /* Annuler la barre "inset" qui se déplaçait avec le scroll */
 .chat-panel::before { content: none; }
@@ -241,7 +246,7 @@ input:focus {
 
 /* Barre d'entrée flottante (mobile) */
 .chat-panel.has-floating {
-  padding-bottom: 84px; /* espace pour la barre flottante */
+  padding-bottom: 0; /* ne pas ajouter d'espace — l'input est hors du scroll */
 }
 .chat-input-floating {
   position: sticky;
@@ -325,7 +330,24 @@ input:focus {
 
 /* Layouts spécifiques */
 .lobby-layout { display: flex; }
-.game-layout { display: flex; }
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px; /* main | sidebar */
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Colonne principale: messages + guesses qui s'ancrent en bas */
+.game-main {
+  display: grid;
+  grid-template-rows: auto auto; /* ChatPanel prend juste la place nécessaire (avec max-height), GuessZone suit en bas */
+  gap: 0.75rem;
+  min-height: 0; /* nécessaire pour que 1fr respecte le conteneur */
+}
+
+.guess-zone {
+  align-self: end; /* colle la zone de guess en bas du conteneur principal */
+}
 
 /* Espacement entre sections de la sidebar (ex: Scores puis Chat) */
 .sidebar > * + * {
@@ -337,17 +359,21 @@ input:focus {
   .lobby-layout { flex-direction: row; }
   .lobby-layout > .chat-box { flex: 2; }
   .lobby-layout > .sidebar { flex: 1; }
-
-  /* PC: en game, scores + chat à droite du container de partie */
-  .game-layout { flex-direction: row; }
-  .game-layout > .chat-panel { flex: 2; }
-  .game-layout > .sidebar { flex: 1; }
 }
 
 @media (max-width: 1023px) {
   /* Mobile/Tablet: empilage vertical */
-  .lobby-layout,
-  .game-layout { flex-direction: column; }
+  .lobby-layout { flex-direction: column; }
+  .game-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .game-main {
+    display: flex;
+    flex-direction: column;
+  }
+  .guess-zone { align-self: stretch; }
+  .chat-panel { max-height: 50vh; }
 }
 
 /* Responsive: bascule en colonne et évite chevauchements sur mobiles */
@@ -375,7 +401,7 @@ input:focus {
   /* Limiter la hauteur du chat sur mobile et activer le scroll */
   .chat-box { max-height: 50vh; }
   .chat-box .chat-panel { max-height: calc(50vh - 84px); overflow-y: auto; }
-  .chat-panel { height: 360px; /* fallback si usage direct */ }
+  .chat-panel { max-height: 55vh; }
   .cta-start-bar .cta-content {
     flex-direction: column;
     align-items: stretch;
@@ -396,6 +422,8 @@ input:focus {
     bottom: 1rem;
     z-index: 120;
     touch-action: manipulation;
+    box-shadow: 0 6px 0 var(--btn-shadow-color);
+    font-weight: 600;
   }
   .guess-bottom-sheet {
     position: fixed;
@@ -543,18 +571,19 @@ input:focus {
   border: 2px solid var(--color-primary);
   border-radius: var(--radius-sm);
   padding: 0.5rem 0.75rem;
-  box-shadow: var(--shadow-pixel);
+  box-shadow: 0 6px 0 var(--btn-shadow-color); /* bleue pour boutons */
   transition: transform 140ms ease, box-shadow 140ms ease, filter 140ms ease;
+  font-weight: 600; /* semi-bold */
 }
 .guess-button:hover:not(:disabled) {
   filter: brightness(1.03);
   transform: translateY(-2px);
   animation: btn-hover-pop 220ms cubic-bezier(0.2, 0.9, 0.2, 1) 1 both;
-  box-shadow: var(--shadow-pixel);
+  box-shadow: 0 6px 0 var(--btn-shadow-color);
 }
 .guess-button:active:not(:disabled) {
   transform: translateY(4px) scaleY(0.96);
-  box-shadow: var(--shadow-pixel-pressed);
+  box-shadow: 0 3px 0 var(--btn-shadow-color);
   filter: none;
 }
 
@@ -714,7 +743,8 @@ strong { font-weight: 700; }
   background: #ffffff;
   color: var(--color-primary);
   border: 2px solid var(--color-primary);
-  box-shadow: var(--shadow-pixel);
+  box-shadow: 0 6px 0 var(--btn-shadow-color); /* bleue uniquement pour boutons */
+  font-weight: 600; /* semi-bold */
 }
 .cta-start-button:hover:not(:disabled) {
   filter: brightness(1.03);
@@ -744,6 +774,21 @@ strong { font-weight: 700; }
   .guess-toggle-btn, .guess-bottom-sheet { display: none !important; }
 }
 
+/* Grille responsive pour la liste de guesses en desktop */
+.guess-list-desktop > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.5rem;
+  align-items: start;
+}
+.guess-list-desktop > div > div:first-child {
+  grid-column: 1 / -1; /* le petit texte d'aide s'étend sur la ligne complète */
+}
+.guess-list-desktop .guess-button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
 /* ─── Chat overlay mobile ─────────────────────────────────────────────── */
 .chat-fab { display: none; }
 .chat-overlay { display: none; }
@@ -758,7 +803,7 @@ strong { font-weight: 700; }
     justify-content: center;
     width: 56px; height: 56px;
     border-radius: 50%;
-    box-shadow: var(--shadow-pixel);
+    box-shadow: 0 6px 0 var(--btn-shadow-color); /* ombre bleue pour bouton */
   }
   .chat-fab .badge {
     position: absolute;
