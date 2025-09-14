@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 // 1) Vite env var (set in .env as VITE_CHATCHOQ_SERVER_URL)
 // 2) Current host on port 3000 (useful when accessing from another device on LAN)
 // 3) Fallback to localhost:3000
-const serverUrl = (
+export const serverUrl = (
 	typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHATCHOQ_SERVER_URL
 ) || (
 	typeof window !== 'undefined' && window.location && window.location.hostname

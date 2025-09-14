@@ -274,7 +274,9 @@ export function useGameLogic(pseudo) {
   const uploadCsv = useCallback(async (csvText) => {
     try {
       if (!currentRoom) throw new Error('Room non définie');
-      const res = await fetch(`http://localhost:3000/api/rooms/${currentRoom}/csv`, {
+      const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHATCHOQ_SERVER_URL)
+        || (typeof window !== 'undefined' && window.location && window.location.hostname ? `http://${window.location.hostname}:3000` : 'http://localhost:3000');
+      const res = await fetch(`${baseUrl}/api/rooms/${currentRoom}/csv`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain',
