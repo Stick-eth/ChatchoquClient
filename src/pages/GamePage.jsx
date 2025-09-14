@@ -128,7 +128,7 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
     return (
       <div className="container game-page" style={{ position: 'relative', paddingBottom: isChef ? '84px' : undefined }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <img src={logo} alt="TerraGuessr" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+          <img src={logo} alt="TerraGuessr" style={{ width: 64, height: 64, imageRendering: 'pixelated' }} />
           <h1 style={{ margin: 0 }}>{`Room #${currentRoom}`}</h1>
         </div>
 
@@ -201,7 +201,7 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
   return (
     <div className="container game-page" style={{ position: 'relative' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-        <img src={logo} alt="TerraGuessr" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+        <img src={logo} alt="TerraGuessr" style={{ width: 64, height: 64, imageRendering: 'pixelated' }} />
         <h1 style={{ margin: 0 }}>{gameStarted ? 'TerraGuessr' : `Room #${currentRoom}`}</h1>
       </div>
       {roomSecret && (

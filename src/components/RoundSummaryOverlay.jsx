@@ -12,6 +12,7 @@ const DISCORD_IMG_REGEX = /^https?:\/\/cdn\.discordapp\.com\/[^\s]+\.(?:png|jpe?
 export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, roundPoints = {}, myPseudo, messages = [] }) {
   const shareRef = useRef(null);
   const [copyState, setCopyState] = useState('idle'); // idle | copying | done | error
+  const [logoSrc, setLogoSrc] = useState('/logo/transparent_logo.png');
   // Messages de la manche au format texte simple
   const roundTexts = useMemo(() => (messages || []).map(m => (m?.content ?? '').toString()).filter(Boolean), [messages]);
   const players = Object.keys(scores);
@@ -56,6 +57,23 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
 
   // Tenor oEmbed thumbnails cache
   const [tenorThumbs, setTenorThumbs] = useState({}); // url -> thumb url
+  // Pré-charger le logo public en data URL (plus fiable dans html2canvas)
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const resp = await fetch('/logo/transparent_logo.png', { cache: 'no-store' });
+        if (!resp.ok) throw new Error('logo fetch failed');
+        const blob = await resp.blob();
+        const reader = new FileReader();
+        reader.onload = () => { if (alive) setLogoSrc(reader.result); };
+        reader.readAsDataURL(blob);
+      } catch {
+        if (alive) setLogoSrc(logo);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
   useEffect(() => {
     let cancelled = false;
     const tenorUrls = new Set();
@@ -70,12 +88,12 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
       const updates = {};
       for (const u of tenorUrls) {
         try {
-          const resp = await fetch(`https://tenor.com/oembed?url=${encodeURIComponent(u)}`);
+          const resp = await fetch(`${serverUrl}/oembed/tenor?url=${encodeURIComponent(u)}`);
           if (!resp.ok) continue;
           const data = await resp.json();
           const thumb = data?.thumbnail_url || data?.url;
           if (thumb) updates[u] = thumb;
-  } catch { /* ignore */ }
+        } catch { /* ignore */ }
       }
       if (!cancelled && Object.keys(updates).length) setTenorThumbs(prev => ({ ...prev, ...updates }));
     })();
@@ -130,11 +148,11 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
         logging: false,
         allowTaint: true,
         onclone: (doc) => {
-          // Forcer les images avatars à se charger dans le clone
-          const imgs = doc.querySelectorAll('img');
-          imgs.forEach((img) => {
-            img.crossOrigin = 'anonymous';
-            img.referrerPolicy = 'no-referrer';
+          // N'ajouter crossOrigin que pour les images externes
+          const extImgs = doc.querySelectorAll('img[data-external-img="1"]');
+          extImgs.forEach((img) => {
+            img.setAttribute('crossorigin', 'anonymous');
+            img.setAttribute('referrerpolicy', 'no-referrer');
           });
         },
       });
@@ -261,7 +279,12 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
             boxSizing: 'border-box',
             borderRadius: 0,
             border: '3px solid #e5e7eb',
-            background: 'linear-gradient(180deg,#5663f7 0%, #414abb 100%)',
+            backgroundColor: '#5663f7',
+            backgroundImage: `
+              repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px),
+              repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px),
+              linear-gradient(180deg,#5663f7 0%, #414abb 100%)
+            `,
             color: 'white',
             fontFamily: 'Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif',
             display: 'flex',
@@ -273,7 +296,7 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
           {/* Header: logo + titre h1 (style in-game) + badge auteur à droite */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-              <img src={'/logo/transparent_logo.png'} alt="TerraGuessr" style={{ width: 96, height: 96, objectFit: 'contain', imageRendering: 'pixelated' }} onError={(e) => { e.currentTarget.src = logo; }} />
+              <img src={logoSrc} alt="TerraGuessr" style={{ width: 96, height: 96, objectFit: 'contain', imageRendering: 'pixelated' }} />
               <div style={{
                 margin: 0,
                 whiteSpace: 'nowrap',
