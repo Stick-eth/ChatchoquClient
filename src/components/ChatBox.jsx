@@ -18,7 +18,9 @@ export function ChatBox({ messages, onSend }) {
   };
 
   return (
-    <div className="chat-box">
+    <div className="chat-box" style={{ position: 'relative' }}>
+      <span className="container-emoji-badge">💬</span>
+      <h3>Chat</h3>
       <div ref={containerRef} className="chat-panel">
         {messages.map((m, i) => (
           <div key={i} className="chat-message">

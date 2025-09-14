@@ -20,9 +20,8 @@ export function ChatPanel({ messages }) {
   return (
     <div ref={containerRef} className="chat-panel">
       {messages.map((m, i) => (
-        <div key={i} className="chat-message">
-          <span className="chat-timestamp">[{m.timestamp.toLocaleTimeString()}]</span>{' '}
-          <div>
+        <div key={i} className="game-message">
+          <div className="bubble">
             {/*
               On découpe le contenu sur chaque URL,
               puis on rerenderise chaque "part":
@@ -32,7 +31,7 @@ export function ChatPanel({ messages }) {
             */}
             {m.content.split(URL_REGEX).map((part, idx) => {
               if (TENOR_REGEX.test(part)) {
-                return <TenorGif key={idx} url={part} height={200} />;
+                return <TenorGif key={idx} url={part} height={220} />;
               }
               if (DISCORD_IMG_REGEX.test(part)) {
                 return (

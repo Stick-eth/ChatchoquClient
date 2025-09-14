@@ -35,6 +35,8 @@ export function useGameLogic(pseudo) {
   const [gameSettings, setGameSettings] = useState(null);
   const [currentRoom, setCurrentRoom] = useState('');
   const [finalRanking, setFinalRanking] = useState([]);
+  const [datasetReady, setDatasetReady] = useState(false);
+  const [datasetInfo, setDatasetInfo] = useState(null);
 
   // store latest scores for callbacks
   useEffect(() => {
@@ -53,13 +55,15 @@ export function useGameLogic(pseudo) {
   // ─── SOCKET EVENTS ────────────────────────────────────────────────────────
   useEffect(() => {
     // 1. Nouvelle salle / participants
-    function handleRoomData({ participants, chef, gameStarted: gs }) {
+    function handleRoomData({ participants, chef, gameStarted: gs, datasetReady: ready, datasetMeta }) {
       setConnected(true);
       setGameStarted(gs);
       setIsChef(pseudo === chef);
       setChefName(chef);
       setScores(Object.fromEntries(participants.map(p => [p, 0])));
       setFinalRanking([]);
+      setDatasetReady(!!ready);
+      if (datasetMeta) setDatasetInfo(datasetMeta);
       setAnnouncements([
         `Participants : ${participants
           .map(p => (p === chef ? `👑${p}` : p))
@@ -100,6 +104,15 @@ export function useGameLogic(pseudo) {
         `Participants : ${Object.keys(scoresRef.current)
           .map(p => (p === chef ? `👑${p}` : p))
           .join(', ')}`
+      ]);
+    }
+
+    function handleDatasetUpdated({ authors, totalMessages, ready }) {
+      setDatasetReady(!!ready);
+      setDatasetInfo({ authors, totalMessages });
+      setAnnouncements(a => [
+        ...a,
+        `Dataset importé (${authors} auteurs, ${totalMessages} messages)`
       ]);
     }
 
@@ -216,6 +229,7 @@ export function useGameLogic(pseudo) {
     socket.on('userJoined', handleUserJoined);
     socket.on('playerLeft', handlePlayerLeft);
     socket.on('chefChanged', handleChefChanged);
+  socket.on('datasetUpdated', handleDatasetUpdated);
     socket.on('gameStarted', handleGameStarted);
     socket.on('roundStarted', handleRoundStarted);
     socket.on('messageRevealed', handleMessageRevealed);
@@ -233,6 +247,7 @@ export function useGameLogic(pseudo) {
       socket.off('userJoined', handleUserJoined);
       socket.off('playerLeft', handlePlayerLeft);
       socket.off('chefChanged', handleChefChanged);
+      socket.off('datasetUpdated', handleDatasetUpdated);
       socket.off('gameStarted', handleGameStarted);
       socket.off('roundStarted', handleRoundStarted);
       socket.off('messageRevealed', handleMessageRevealed);
@@ -247,14 +262,42 @@ export function useGameLogic(pseudo) {
   }, [pseudo, roundNumber, lastAuthor, chefName]);
 
   // ─── ÉMETTEURS VERS LE SERVEUR ────────────────────────────────────────────
-  const joinRoom = useCallback(({ roomCode, pseudo: p }) => {
+  const joinRoom = useCallback(({ roomCode, pseudo: p, secret }) => {
     setCurrentRoom(roomCode);
-    socket.emit('joinRoom', { roomCode, pseudo: p });
+    socket.emit('joinRoom', { roomCode, pseudo: p, secret });
   }, []);
 
   const startGame = useCallback((params = {}) => {
     socket.emit('startGame', params);
   }, []);
+
+  const uploadCsv = useCallback(async (csvText) => {
+    try {
+      if (!currentRoom) throw new Error('Room non définie');
+      const res = await fetch(`http://localhost:3000/api/rooms/${currentRoom}/csv`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+          'x-chef-id': socket.id || '',
+        },
+        body: csvText,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data?.error || `HTTP ${res.status}`;
+        setAnnouncements(a => [...a, `Erreur upload CSV: ${msg}`]);
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (typeof data.authors === 'number') {
+        setDatasetReady(true);
+        setDatasetInfo({ authors: data.authors, totalMessages: data.totalMessages || 0 });
+        setAnnouncements(a => [...a, `Dataset importé (${data.authors} auteurs, ${data.totalMessages || 0} messages)`]);
+      }
+    } catch (e) {
+      setAnnouncements(a => [...a, `Erreur upload CSV: ${e.message}`]);
+    }
+  }, [currentRoom]);
 
   const submitGuess = useCallback(guess => {
     socket.emit('submitGuess', { guess });
@@ -325,5 +368,8 @@ export function useGameLogic(pseudo) {
     sendChatMessage,
     finalRanking,
     chatMessages,
+    datasetReady,
+    datasetInfo,
+    uploadCsv,
   };
 }

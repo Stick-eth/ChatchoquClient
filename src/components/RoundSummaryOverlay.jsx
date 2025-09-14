@@ -3,8 +3,7 @@ import { Confetti } from './Confetti';
 export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, roundPoints = {}, myPseudo }) {
   if (!visible) return null;
 
-  const ranking = Object.entries(scores)
-    .sort(([, a], [, b]) => b - a);
+  const players = Object.keys(scores);
 
   return (
     <div className="modal-overlay">
@@ -15,25 +14,26 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
           className="round-author-img"
         />
         <h2>L'auteur était {author}</h2>
-        <h3>Classement</h3>
-        <ol style={{ textAlign: 'left' }}>
-          {ranking.map(([p, s]) => {
+        <h3>Guesses des joueurs</h3>
+        <div className="guesses-grid">
+          {players.map((p) => {
             const guess = proposals[p]?.guess;
             const correct = guess === author;
             const points = roundPoints[p] ?? 0;
             return (
-              <li
-                key={p}
-                style={{ position: 'relative', padding: '0.5rem 0' }}
-              >
-                <span>
-                  {correct ? '✅' : '❌'} {p}: {s} (+{points})
-                </span>
+              <div key={p} className="guess-card">
+                <div className={`guess-sticker ${correct ? 'correct' : 'wrong'}`}>
+                  {correct ? '✅' : '❌'} {guess || '—'}
+                </div>
+                <div className="guess-meta">
+                  <strong>{p}{p === myPseudo ? ' (Moi)' : ''}</strong>
+                  <small>{points ? `+${points} pts` : '0 pt'}</small>
+                </div>
                 <Confetti active={correct && p === myPseudo} />
-              </li>
+              </div>
             );
           })}
-        </ol>
+        </div>
       </div>
     </div>
   );
