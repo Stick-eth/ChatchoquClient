@@ -9,7 +9,7 @@ export function RoundSummaryOverlay({ visible, author, scores, proposals = {}, r
     <div className="modal-overlay">
       <div className="modal">
         <img
-          src={`src/assets/pfp/${author}.png`}
+          src={`/pfp/${author}.png`}
           alt={author}
           className="round-author-img"
         />

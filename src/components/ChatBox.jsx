@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-export function ChatBox({ messages, onSend }) {
+export function ChatBox({ messages, onSend, floatingInput = false, showHeader = true }) {
   const [text, setText] = useState('');
   const containerRef = useRef(null);
 
@@ -11,17 +11,31 @@ export function ChatBox({ messages, onSend }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    const trimmed = text.trim();
+    const trimmed = text.trim().slice(0, 500);
     if (!trimmed) return;
     if (onSend) onSend(trimmed);
     setText('');
   };
 
+  const inputForm = (
+    <form onSubmit={handleSubmit} className={floatingInput ? 'chat-input-floating' : 'chat-input'}>
+      <div className={floatingInput ? 'chat-input-inner' : ''}>
+        <input
+          value={text}
+          maxLength={500}
+          onChange={e => setText(e.target.value.slice(0, 500))}
+          placeholder="Message..."
+        />
+        <button type="submit">Envoyer</button>
+      </div>
+    </form>
+  );
+
   return (
     <div className="chat-box" style={{ position: 'relative' }}>
-      <span className="container-emoji-badge">💬</span>
-      <h3>Chat</h3>
-      <div ref={containerRef} className="chat-panel">
+      {showHeader && <span className="container-emoji-badge">💬</span>}
+      {showHeader && <h3>Chat</h3>}
+      <div ref={containerRef} className={`chat-panel${floatingInput ? ' has-floating' : ''}`}>
         {messages.map((m, i) => (
           <div key={i} className="chat-message">
             <span className="chat-timestamp">[{m.timestamp.toLocaleTimeString()}]</span>{' '}
@@ -29,14 +43,7 @@ export function ChatBox({ messages, onSend }) {
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className="chat-input">
-        <input
-          value={text}
-          onChange={e => setText(e.target.value)}
-          placeholder="Message..."
-        />
-        <button type="submit">Envoyer</button>
-      </form>
+      {inputForm}
     </div>
   );
 }

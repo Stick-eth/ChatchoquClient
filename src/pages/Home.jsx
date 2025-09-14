@@ -13,7 +13,8 @@ export function Home({ onConfirm }) {
           <input
             placeholder="Pseudo"
             value={value}
-            onChange={e => setValue(e.target.value)}
+            maxLength={16}
+            onChange={e => setValue(e.target.value.slice(0, 16))}
             style={{
               flex: 1,
               padding: '0.75rem 1rem',
@@ -23,7 +24,10 @@ export function Home({ onConfirm }) {
               color: 'var(--color-text)'
             }}
           />
-          <button onClick={() => value && onConfirm(value)}>Continuer</button>
+          <button onClick={() => {
+            const v = (value || '').trim();
+            if (v && v.length <= 16) onConfirm(v);
+          }}>Continuer</button>
         </div>
       </div>
     </div>

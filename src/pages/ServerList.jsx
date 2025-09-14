@@ -30,6 +30,7 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
   return (
     <div className="container" style={{ position: 'relative' }}>
       <button
+        className="btn-identity"
         style={{ position: 'absolute', top: '1rem', right: '1rem' }}
         onClick={() => {
           setTmpPseudo(pseudo);
@@ -43,7 +44,7 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
 
       <div className="card" style={{ marginBottom: '1rem' }}>
         <h2>Rejoindre ou créer un salon</h2>
-        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+        <div className="row-wrap" style={{ gap: '0.5rem', marginTop: '1rem' }}>
           <input
             placeholder="Code salon (6 chiffres)"
             value={roomCode}
@@ -79,11 +80,16 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
         <div className="modal-overlay">
           <div className="modal">
             <h2>Modifier le pseudo</h2>
-            <input value={tmpPseudo} onChange={e => setTmpPseudo(e.target.value)} />
+            <input
+              value={tmpPseudo}
+              maxLength={16}
+              onChange={e => setTmpPseudo(e.target.value.slice(0, 16))}
+            />
             <div>
               <button
                 onClick={() => {
-                  onPseudoChange(tmpPseudo);
+                  const v = (tmpPseudo || '').trim().slice(0, 16);
+                  if (v) onPseudoChange(v);
                   setShowModal(false);
                 }}
               >

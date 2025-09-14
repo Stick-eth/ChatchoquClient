@@ -21,6 +21,9 @@ export function ChatPanel({ messages }) {
     <div ref={containerRef} className="chat-panel">
       {messages.map((m, i) => (
         <div key={i} className="game-message">
+          <div className="speaker-emoji" aria-hidden>
+            🗣️
+          </div>
           <div className="bubble">
             {/*
               On découpe le contenu sur chaque URL,

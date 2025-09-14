@@ -50,9 +50,10 @@ export default function App() {
   }, [pseudo, route, navigate]);
 
   const updatePseudo = p => {
-    setPseudo(p);
-    if (p) {
-      localStorage.setItem('pseudo', p);
+    const v = (p || '').trim().slice(0, 16);
+    setPseudo(v);
+    if (v) {
+      localStorage.setItem('pseudo', v);
     } else {
       localStorage.removeItem('pseudo');
     }

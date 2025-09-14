@@ -37,6 +37,9 @@ export function useGameLogic(pseudo) {
   const [finalRanking, setFinalRanking] = useState([]);
   const [datasetReady, setDatasetReady] = useState(false);
   const [datasetInfo, setDatasetInfo] = useState(null);
+  // Upload CSV progress state
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0); // 0..100
 
   // store latest scores for callbacks
   useEffect(() => {
@@ -276,27 +279,70 @@ export function useGameLogic(pseudo) {
       if (!currentRoom) throw new Error('Room non définie');
       const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHATCHOQ_SERVER_URL)
         || (typeof window !== 'undefined' && window.location && window.location.hostname ? `http://${window.location.hostname}:3000` : 'http://localhost:3000');
-      const res = await fetch(`${baseUrl}/api/rooms/${currentRoom}/csv`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain',
-          'x-chef-id': socket.id || '',
-        },
-        body: csvText,
+
+      // Utilise XMLHttpRequest pour suivre la progression d'upload
+      setUploading(true);
+      setUploadProgress(0);
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${baseUrl}/api/rooms/${currentRoom}/csv`, true);
+        xhr.setRequestHeader('Content-Type', 'text/plain');
+        xhr.setRequestHeader('x-chef-id', socket.id || '');
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            setUploadProgress(pct);
+          } else {
+            // Si la taille n'est pas calculable, afficher une progression indéterminée (on laisse le pourcentage tel quel)
+            setUploadProgress((p) => (p < 99 ? p + 1 : p));
+          }
+        };
+
+        xhr.onload = () => {
+          try {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              const data = JSON.parse(xhr.responseText || '{}');
+              if (typeof data.authors === 'number') {
+                setDatasetReady(true);
+                setDatasetInfo({ authors: data.authors, totalMessages: data.totalMessages || 0 });
+                setAnnouncements(a => [...a, `Dataset importé (${data.authors} auteurs, ${data.totalMessages || 0} messages)`]);
+              }
+              resolve(null);
+            } else {
+              let msg = `HTTP ${xhr.status}`;
+              try {
+                const data = JSON.parse(xhr.responseText || '{}');
+                if (data && data.error) msg = data.error;
+              } catch {
+                /* ignore JSON parse error */
+              }
+              setAnnouncements(a => [...a, `Erreur upload CSV: ${msg}`]);
+              reject(new Error(msg));
+            }
+          } catch (err) {
+            setAnnouncements(a => [...a, `Erreur upload CSV: ${err.message}`]);
+            reject(err);
+          }
+        };
+
+        xhr.onerror = () => {
+          setAnnouncements(a => [...a, 'Erreur upload CSV: réseau']);
+          reject(new Error('network_error'));
+        };
+
+        xhr.onloadend = () => {
+          setUploading(false);
+          setUploadProgress(100);
+          // après un court délai, réinitialiser visuellement
+          setTimeout(() => setUploadProgress(0), 600);
+        };
+
+        xhr.send(csvText);
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data?.error || `HTTP ${res.status}`;
-        setAnnouncements(a => [...a, `Erreur upload CSV: ${msg}`]);
-        return;
-      }
-      const data = await res.json().catch(() => ({}));
-      if (typeof data.authors === 'number') {
-        setDatasetReady(true);
-        setDatasetInfo({ authors: data.authors, totalMessages: data.totalMessages || 0 });
-        setAnnouncements(a => [...a, `Dataset importé (${data.authors} auteurs, ${data.totalMessages || 0} messages)`]);
-      }
     } catch (e) {
+      setUploading(false);
       setAnnouncements(a => [...a, `Erreur upload CSV: ${e.message}`]);
     }
   }, [currentRoom]);
@@ -313,11 +359,14 @@ export function useGameLogic(pseudo) {
   }, []);
 
   const sendChatMessage = useCallback(message => {
-    socket.emit('sendChatMessage', { message });
+    const safe = (message || '').toString().slice(0, 500);
+    socket.emit('sendChatMessage', { message: safe });
   }, []);
 
   const leaveRoom = useCallback(() => {
-    socket.emit('leaveRoom');
+    socket.emit('leaveRoom', () => {
+      // ACK reçu: on peut nettoyer et laisser la navigation se faire côté UI
+    });
     // reset local state
     setConnected(false);
     setGameStarted(false);
@@ -373,5 +422,7 @@ export function useGameLogic(pseudo) {
     datasetReady,
     datasetInfo,
     uploadCsv,
+    uploading,
+    uploadProgress,
   };
 }

@@ -50,6 +50,8 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
     datasetReady,
     datasetInfo,
     uploadCsv,
+    uploading,
+    uploadProgress,
   } = useGameLogic(pseudo);
 
   // join room automatically once
@@ -64,6 +66,22 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
     leaveRoom();
     hasJoinedRef.current = false;
   };
+
+  // État du chat overlay (mobile) + badge "nouveau message"
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatUnread, setChatUnread] = useState(false);
+  const lastSeenChatLenRef = useRef(0);
+  useEffect(() => {
+    const len = chatMessages?.length || 0;
+    // Si overlay fermé et nouveaux messages → activer le badge (1)
+    if (!chatOpen && len > lastSeenChatLenRef.current) {
+      setChatUnread(true);
+    }
+    // Mémoriser la longueur courante
+    lastSeenChatLenRef.current = len;
+  }, [chatMessages, chatOpen]);
+  const openChat = () => { setChatOpen(true); setChatUnread(false); };
+  const closeChat = () => setChatOpen(false);
 
   const overlayVisible = phase === 'Résultat' || phase === 'Transition';
 
@@ -81,6 +99,7 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
         </div>
 
         <button
+          className="btn-quit"
           onClick={() => {
             if (window.confirm('Quitter la partie ?')) {
               handleLeave();
@@ -109,10 +128,12 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
           }}
           datasetReady={datasetReady}
           datasetInfo={datasetInfo}
+          uploading={uploading}
+          uploadProgress={uploadProgress}
         />
 
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <ChatBox messages={chatMessages} onSend={sendChatMessage} />
+        <div className="row-wrap lobby-layout" style={{ gap: '1rem', marginTop: '1rem' }}>
+          <ChatBox messages={chatMessages} onSend={sendChatMessage} floatingInput />
           <div className="sidebar">
             {/* En lobby: afficher Annonces au lieu de Scores */}
             <Announcements announcements={announcements} />
@@ -156,6 +177,7 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
       )}
 
       <button
+        className="btn-quit"
         onClick={() => {
           if (window.confirm('Quitter la partie ?')) {
             handleLeave();
@@ -184,14 +206,19 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
         }}
         datasetReady={datasetReady}
         datasetInfo={datasetInfo}
+        uploading={uploading}
+        uploadProgress={uploadProgress}
       />
 
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+      <div className="row-wrap game-layout" style={{ gap: '1rem', marginTop: '1rem' }}>
         <ChatPanel messages={messages} />
 
         <div className="sidebar">
           <Scores scores={scores} chefName={chefName} guessedPlayers={playersGuessed} />
-          <ChatBox messages={chatMessages} onSend={sendChatMessage} />
+          {/* Cacher le chat de la sidebar lorsque l'overlay est ouvert (mobile) */}
+          <div style={{ display: chatOpen ? 'none' : undefined }}>
+            <ChatBox messages={chatMessages} onSend={sendChatMessage} />
+          </div>
         </div>
       </div>
 
@@ -230,6 +257,30 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
           Paramètres : {gameSettings.roundsTotal} manches –{' '}
           {gameSettings.messagesPerRound} messages/manche –{' '}
           {gameSettings.onlyGifs ? 'uniquement GIFs' : 'textes et GIFs'} – Pav-o-meter {gameSettings.minMessageLength}
+        </div>
+      )}
+
+      {/* Bouton flottant de chat (mobile). Visible via CSS @media */}
+      <button
+        type="button"
+        className="chat-fab"
+        aria-label="Ouvrir le chat"
+        onClick={openChat}
+      >
+        💬
+        {chatUnread && <span className="badge">1</span>}
+      </button>
+
+      {/* Overlay de chat (mobile) */}
+      {chatOpen && (
+        <div className="chat-overlay" role="dialog" aria-modal="true" onClick={closeChat}>
+          <div className="chat-sheet" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <h3 style={{ margin: 0 }}>Chat</h3>
+              <button onClick={closeChat} aria-label="Fermer le chat">Fermer</button>
+            </div>
+            <ChatBox messages={chatMessages} onSend={sendChatMessage} floatingInput showHeader={false} />
+          </div>
         </div>
       )}
     </div>

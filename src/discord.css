@@ -18,9 +18,9 @@
   --text-primary: #ffffff;            /* texte sur fond primaire */
   --text-secondary: #e5e7eb;          /* gris clair */
   --border-color: #e5e7eb;            /* gris clair */
-  /* Ombres pixel 8-bit (sans flou) vers le bas */
-  --shadow-pixel: 0 6px 0 var(--color-secondary);
-  --shadow-pixel-pressed: 0 2px 0 var(--color-secondary);
+  /* Ombres pixel 8-bit (sans flou) vers le bas – légèrement plus sombres */
+  --shadow-pixel: 0 4px 0 #d1d5db;          /* gris un peu plus foncé que --border-color */
+  --shadow-pixel-pressed: 0 2px 0 #d1d5db;   /* cohérent en press */
   --radius: 0;
   --radius-sm: 0;
   /* Grille blueprint */
@@ -144,6 +144,41 @@ input:focus {
 }
 .container > * + * { margin-top: 1rem; }
 
+/* Topbar mobile fixe pour manche/phase/temps */
+.mobile-topbar {
+  display: none; /* caché par défaut (desktop) */
+}
+@media (max-width: 768px) {
+  .mobile-topbar {
+    display: block; /* visible sur mobile */
+    position: fixed; /* fixé en haut de l'écran */
+    top: 0;
+    left: 0; right: 0;
+    z-index: 200;
+    background: color-mix(in oklab, var(--bg-secondary) calc(var(--surface-alpha)*100%), transparent);
+    border-bottom: 2px solid var(--border-color);
+    box-shadow: 0 6px 0 color-mix(in oklab, var(--color-secondary) 90%, transparent);
+  }
+  .mobile-topbar-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: #2f3441;
+  }
+  /* Esapcement de compensation sous la barre fixe */
+  .game-page { padding-top: 56px; }
+  /* Éviter le doublon d'infos sous la barre mobile */
+  .game-header-row { display: none !important; }
+  .mtb-round { font-weight: 700; }
+  .mtb-phase { opacity: 0.9; }
+  .mtb-timer {
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+}
+
 /* Cards - cartoon look */
 .card {
   /* Surface plus douce: semi-transparente sur le fond primaire */
@@ -162,22 +197,14 @@ input:focus {
 }
 .card + .card { margin-top: 1rem; }
 .card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  box-shadow: inset 0 -4px 0 0 var(--color-secondary);
-  transition: box-shadow 160ms ease;
+  content: none;
 }
 .card:hover {
   transform: translateY(-2px);
   animation: card-hover-bob 240ms cubic-bezier(0.2, 0.9, 0.2, 1) 1 both;
   box-shadow: var(--shadow-pixel);
 }
-.card:hover::before {
-  box-shadow: inset 0 -4px 0 0 var(--color-primary);
-}
+.card:hover::before { box-shadow: none; }
 
 .chat-panel {
   flex: 2;
@@ -194,17 +221,11 @@ input:focus {
   --text-secondary: #6b7280;
   color: var(--text-primary);
   position: relative;
-  overflow: hidden;
   box-shadow: var(--shadow-pixel);
 }
-.chat-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  box-shadow: inset 0 -4px 0 0 var(--color-secondary);
-}
+/* Annuler la barre "inset" qui se déplaçait avec le scroll */
+.chat-panel::before { content: none; }
+.chat-panel::after { content: none; }
 
 .chat-box {
   flex: 2;
@@ -216,6 +237,23 @@ input:focus {
 .chat-box .chat-panel {
   flex: 1;
   height: auto;
+}
+
+/* Barre d'entrée flottante (mobile) */
+.chat-panel.has-floating {
+  padding-bottom: 84px; /* espace pour la barre flottante */
+}
+.chat-input-floating {
+  position: sticky;
+  bottom: 0;
+  margin-top: 0.5rem;
+}
+.chat-input-floating .chat-input-inner {
+  display: flex;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 2px solid var(--border-color);
+  padding: 0.5rem;
 }
 
 .chat-input {
@@ -249,6 +287,14 @@ input:focus {
   display: flex;
   margin: 0.25rem 0;
 }
+.game-message .speaker-emoji {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+}
 .game-message .bubble {
   background: #ffffff;
   color: #111827; /* gris très sombre pour lisibilité sur blanc */
@@ -275,6 +321,100 @@ input:focus {
 
 .sidebar {
   flex: 1;
+}
+
+/* Layouts spécifiques */
+.lobby-layout { display: flex; }
+.game-layout { display: flex; }
+
+/* Espacement entre sections de la sidebar (ex: Scores puis Chat) */
+.sidebar > * + * {
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  /* PC: en lobby, annonces à droite du chat */
+  .lobby-layout { flex-direction: row; }
+  .lobby-layout > .chat-box { flex: 2; }
+  .lobby-layout > .sidebar { flex: 1; }
+
+  /* PC: en game, scores + chat à droite du container de partie */
+  .game-layout { flex-direction: row; }
+  .game-layout > .chat-panel { flex: 2; }
+  .game-layout > .sidebar { flex: 1; }
+}
+
+@media (max-width: 1023px) {
+  /* Mobile/Tablet: empilage vertical */
+  .lobby-layout,
+  .game-layout { flex-direction: column; }
+}
+
+/* Responsive: bascule en colonne et évite chevauchements sur mobiles */
+@media (max-width: 768px) {
+  .row-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+  /* La liste desktop des guesses est masquée sur mobile; on utilise le bottom sheet */
+  .guess-list-desktop { display: none !important; }
+  .container h1 {
+    margin-right: 4rem; /* espace pour le bouton en haut à droite */
+  }
+  .btn-quit {
+    position: static !important;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .btn-identity {
+    position: static !important;
+    width: 100%;
+    margin-top: 0.5rem;
+    order: -1;
+  }
+  /* Limiter la hauteur du chat sur mobile et activer le scroll */
+  .chat-box { max-height: 50vh; }
+  .chat-box .chat-panel { max-height: calc(50vh - 84px); overflow-y: auto; }
+  .chat-panel { height: 360px; /* fallback si usage direct */ }
+  .cta-start-bar .cta-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  /* Retirer le chat de l'interface principale sur mobile (utiliser le modal) */
+  .sidebar .chat-box { display: none !important; }
+}
+
+/* Bottom sheet des guesses (mobile) */
+.guess-bottom-sheet { display: none; }
+@media (max-width: 768px) {
+  .guess-toggle-btn {
+    position: fixed;
+    left: 0; right: 0;
+    margin: 0 auto;
+    width: fit-content;
+    bottom: 1rem;
+    z-index: 120;
+    touch-action: manipulation;
+  }
+  .guess-bottom-sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: color-mix(in oklab, var(--bg-secondary) calc(var(--surface-alpha)*100%), transparent);
+    border-top: 2px solid var(--border-color);
+    box-shadow: 0 -6px 0 color-mix(in oklab, var(--color-secondary) 90%, transparent);
+    padding: 0.75rem 1rem;
+    z-index: 110;
+    max-height: 52vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+  }
+  .guess-bottom-sheet .guess-button {
+    position: static; /* annule tout sticky hérité */
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .modal-overlay {
@@ -305,14 +445,7 @@ input:focus {
   position: relative;
   overflow: hidden;
 }
-.modal::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  box-shadow: inset 0 -4px 0 0 var(--color-secondary);
-}
+.modal::before { content: none; }
 
 /* ─── Sticker du guess (overlay résultat) ───────────────────────────────── */
 .guess-sticker {
@@ -603,4 +736,58 @@ strong { font-weight: 700; }
   user-select: none;
   pointer-events: none; /* ne gêne pas les interactions */
   z-index: 1;
+}
+
+/* Afficher la liste inline pour écrans >=769px */
+@media (min-width: 769px) {
+  .guess-list-desktop { display: block !important; }
+  .guess-toggle-btn, .guess-bottom-sheet { display: none !important; }
+}
+
+/* ─── Chat overlay mobile ─────────────────────────────────────────────── */
+.chat-fab { display: none; }
+.chat-overlay { display: none; }
+@media (max-width: 768px) {
+  .chat-fab {
+    position: fixed;
+    right: 1rem; /* angle de l'écran */
+    bottom: 4.5rem; /* au-dessus du bouton guesses si présent */
+    z-index: 130;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-pixel);
+  }
+  .chat-fab .badge {
+    position: absolute;
+    top: -6px; right: -6px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #ef4444; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800;
+    border: 2px solid #fff;
+  }
+  .chat-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(65, 74, 187, 0.28);
+    z-index: 180; /* au-dessus du contenu de jeu */
+    display: flex;
+    align-items: flex-end;
+    padding: 0.75rem;
+  }
+  .chat-sheet {
+    background: color-mix(in oklab, var(--bg-secondary) calc(var(--surface-alpha)*100%), transparent);
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-pixel);
+    width: 100%;
+    max-height: 70vh;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+  .chat-sheet h3 { color: #2f3441; }
+  .chat-sheet .chat-panel { max-height: 50vh; overflow-y: auto; }
 }
