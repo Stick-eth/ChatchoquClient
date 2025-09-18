@@ -92,7 +92,7 @@ export default function App() {
   }
 
   if (route.startsWith('#/room/')) {
-    const rest = route.slice(7); // could be 'CODE' or 'CODE?secret=...'
+    const rest = route.slice(7); // could be 'CODE' or 'CODE?secret='
     const [codePart, query] = rest.split('?');
     const code = codePart;
     // parse secret in query string (hash mode)
@@ -135,7 +135,7 @@ export default function App() {
   return (
     <>
       {showLoader && <LoadingOverlay visible={!leavingLoader} leaving={leavingLoader} />}
-      <Landing />
+      <Landing onSetPseudo={updatePseudo} onNavigate={navigate} />
     </>
   );
 }

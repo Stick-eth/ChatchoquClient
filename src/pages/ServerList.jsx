@@ -1,48 +1,47 @@
-import React, { useEffect, useState } from 'react';
-import { socket } from '../socket';
+import React, { useState } from 'react';
+// Removed rooms listing API usage
+// import { socket } from '../socket';
+import logo from '../assets/logo/transparent_logo.png';
+import { FiUser } from 'react-icons/fi';
 
 export function ServerList({ pseudo, onJoin, onPseudoChange }) {
-  const [rooms, setRooms] = useState([]);
+  // const [rooms, setRooms] = useState([]);
   const [roomCode, setRoomCode] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [tmpPseudo, setTmpPseudo] = useState(pseudo);
 
-  useEffect(() => {
-    socket.emit('getActiveRooms');
-    function handleRooms({ rooms }) {
-      setRooms(rooms);
-    }
-    socket.on('activeRooms', handleRooms);
-    const interval = setInterval(() => {
-      socket.emit('getActiveRooms');
-    }, 5000);
-    return () => {
-      socket.off('activeRooms', handleRooms);
-      clearInterval(interval);
-    };
-  }, []);
+  // Remove public rooms listing: no polling, no API calls
+  // useEffect(() => { /* removed */ }, []);
 
   const createRoom = () => {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     onJoin(code);
   };
 
+  const cmd = 'tgr start @joueur1 @joueur2 #channel1 #channel3';
+
   return (
-    <div className="container" style={{ position: 'relative' }}>
-      <button
-        className="btn-identity"
-        style={{ position: 'absolute', top: '1rem', right: '1rem' }}
-        onClick={() => {
-          setTmpPseudo(pseudo);
-          setShowModal(true);
-        }}
-      >
-        {pseudo}
-      </button>
+    <div className="container" style={{ position: 'relative', padding: '0 6rem', maxWidth: 1100, margin: '0 auto' }}>
+      {/* Header with brand on the left and identity button aligned on the right */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.5rem', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <img src={logo} alt="TerraGuessr" style={{ width: 64, height: 64, imageRendering: 'pixelated' }} />
+          <h1 style={{ margin: 0 }}>TerraGuessr</h1>
+        </div>
+        <button
+          className="btn-identity"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+          onClick={() => {
+            setTmpPseudo(pseudo);
+            setShowModal(true);
+          }}
+        >
+          <FiUser aria-hidden="true" />
+          {pseudo}
+        </button>
+      </div>
 
-      <h1>Lobby TerraGuessr</h1>
-
-      <div className="card" style={{ marginBottom: '1rem' }}>
+      <div className="card" style={{ margin: '1rem 0' }}>
         <h2>Rejoindre ou créer un salon</h2>
         <div className="row-wrap" style={{ gap: '0.5rem', marginTop: '1rem' }}>
           <input
@@ -58,23 +57,33 @@ export function ServerList({ pseudo, onJoin, onPseudoChange }) {
         </div>
       </div>
 
-      <h2>Salles disponibles</h2>
-      {rooms.length === 0 ? (
-        <p>Aucune salle ouverte pour le moment.</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {rooms.map(r => (
-            <li key={r.roomCode} style={{ marginBottom: '0.5rem' }}>
-              <button className="card" style={{ width: '100%', textAlign: 'center' }} onClick={() => onJoin(r.roomCode)}>
-                <div style={{ fontSize: '1.25rem' }}>#{r.roomCode}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{r.chef}</div>
-                <hr style={{ width: '33%', margin: '0.5rem auto', borderColor: 'var(--border-color)' }} />
-                <div>{r.playerCount} joueur{r.playerCount > 1 ? 's' : ''}</div>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="card" style={{ margin: '1rem 0' }}>
+        <h2>Lancer une partie avec le bot Discord</h2>
+        <ol style={{ marginTop: '0.25rem', color: 'var(--text-secondary)' }}>
+          <li>Invitez le bot sur votre serveur Discord.</li>
+          <li>Dans le bon salon, exécutez la commande ci‑dessous.</li>
+        </ol>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center', marginTop: '0.75rem' }}>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1416593032240955484"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <button type="button">Inviter le bot Discord</button>
+          </a>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.75rem' }}>
+          <input
+            value={cmd}
+            readOnly
+            title="Copiez puis collez cette commande dans Discord"
+            style={{ flex: 1, cursor: 'text' }}
+          />
+        </div>
+        {/* Example paragraph removed as requested */}
+      </div>
+
+      {/* Rooms listing removed from the UI */}
 
       {showModal && (
         <div className="modal-overlay">
