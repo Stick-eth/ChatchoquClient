@@ -78,7 +78,7 @@ export function GameHeader({
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(180px, 1fr))', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(180px, 1fr))', gap: '0.75rem' }}>
             <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
               <div>Rounds: {roomParams.rounds}</div>
               <input
@@ -123,6 +123,22 @@ export function GameHeader({
                   setRoomParams({
                     ...roomParams,
                     minMessageLength: parseInt(e.target.value, 10),
+                  })
+                }
+              />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div>Temps réflexion (s/message): {roomParams.thinkingTimeSec}</div>
+              <input
+                type="range"
+                min="3"
+                max="20"
+                step="1"
+                value={roomParams.thinkingTimeSec}
+                onChange={e =>
+                  setRoomParams({
+                    ...roomParams,
+                    thinkingTimeSec: parseInt(e.target.value, 10),
                   })
                 }
               />

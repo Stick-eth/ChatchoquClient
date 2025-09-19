@@ -16,6 +16,8 @@ export default function GamePage({ roomCode, roomSecret, pseudo, onLeave }) {
     onlyGifs: false,
     messagesPerRound: 1,
     minMessageLength: 20,
+    // nouveau: temps de réflexion (secondes)
+    thinkingTimeSec: 5,
   });
   const hasJoinedRef = useRef(false);
 
